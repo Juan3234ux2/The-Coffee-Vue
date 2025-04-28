@@ -2,15 +2,17 @@
     <Form
         v-slot="$form"
         :initialValues
-        class="flex xl:gap-8 relative flex-col xl:flex-row"
+        class="flex xl:gap-8 mb-4 flex-col xl:flex-row relative"
         :resolver
-        :initial-values
+        ref="form"
         @submit="onFormSubmit"
     >
-        <div class="card grow">
-            <h1 class="text-4xl text-black font-bold mb-8">Agregar Producto</h1>
+        <div class="card grow !mb-0">
+            <h1 class="text-4xl text-black font-bold mb-8">
+                {{ isEditMode ? 'Editar Producto' : 'Agregar Producto' }}
+            </h1>
             <div class="mb-2" v-auto-animate>
-                <label for="codigo" class="block text-lg font-semibold mb-2">Código</label>
+                <label for="codigo" class="block text-base font-semibold mb-2">Código</label>
                 <InputNumber
                     input-id="codigo"
                     :use-grouping="false"
@@ -28,7 +30,7 @@
                 >
             </div>
             <div class="mb-2" v-auto-animate>
-                <label for="nombre" class="block text-lg font-semibold mb-2">Nombre</label>
+                <label for="nombre" class="block text-base font-semibold mb-2">Nombre</label>
                 <InputText
                     id="nombre"
                     type="text"
@@ -46,13 +48,13 @@
                 >
             </div>
             <div class="mb-2" v-auto-animate>
-                <label for="categoria" class="block text-lg font-semibold mb-2">Categoría</label>
+                <label for="categoria" class="block text-base font-semibold mb-2">Categoría</label>
                 <Select
                     optionLabel="nombre"
                     optionValue="id"
                     :options="categories"
                     :loading="loadingCategories"
-                    class="items-center mb-4"
+                    class="mb-4"
                     fluid
                     :class="{ '!mb-2': $form.categoria_id?.invalid }"
                     name="categoria_id"
@@ -67,7 +69,7 @@
                 >
             </div>
             <div class="mb-2" v-auto-animate>
-                <label for="descripcion" class="block text-lg font-semibold mb-2"
+                <label for="descripcion" class="block text-base font-semibold mb-2"
                     >Descripcion</label
                 >
                 <Textarea
@@ -80,7 +82,7 @@
                 />
             </div>
             <div class="mb-2" v-auto-animate>
-                <label for="costo" class="block text-lg font-semibold mb-2">Costo</label>
+                <label for="costo" class="block text-base font-semibold mb-2">Costo</label>
                 <InputNumber
                     input-id="costo"
                     placeholder="Ingrese el costo del producto"
@@ -97,7 +99,7 @@
                 >
             </div>
             <div class="mb-2" v-auto-animate>
-                <label for="precio" class="block text-lg font-semibold mb-2">Precio</label>
+                <label for="precio" class="block text-base font-semibold mb-2">Precio</label>
                 <InputNumber
                     input-id="precio"
                     placeholder="Ingrese el precio del producto"
@@ -113,93 +115,98 @@
                     >{{ $form.precio.error?.message }}</Message
                 >
             </div>
+
             <div class="mb-2" v-auto-animate>
-                <label for="status" class="block text-lg font-semibold mb-2">Activo</label>
+                <label for="status" class="block text-base font-semibold mb-2">Activo</label>
                 <ToggleSwitch input-id="status" class="mb-2" name="activo" />
             </div>
         </div>
-        <div class="w-full xl:w-[350px]">
-            <div class="card h-fit xl:fixed w-[350px]">
-                <div class="flex flex-col flex-1 max-w-md mb-8">
-                    <span for="codigo" class="block text-lg font-semibold mb-2"
-                        >Imagen del producto</span
-                    >
-                    <div class="w-full bg-surface-50 dark:bg-surface-950 aspect-square">
-                        <div
-                            class="flex items-center justify-center h-full bg-surface-400"
-                            v-if="!src"
-                        >
-                            <i class="pi pi-images text-white" style="font-size: 4.5rem"></i>
-                        </div>
-                        <img :src="src" class="object-cover w-full h-full" alt="logo" v-else />
+
+        <div class="card h-fit xl:sticky w-[310px] top-24">
+            <div class="flex flex-col flex-1 max-w-md mb-8">
+                <span for="codigo" class="block text-base font-semibold mb-2"
+                    >Imagen del producto</span
+                >
+                <div class="w-full bg-surface-50 dark:bg-surface-950 aspect-square">
+                    <div class="flex items-center justify-center h-full bg-surface-400" v-if="!src">
+                        <i class="pi pi-images text-white" style="font-size: 4.5rem"></i>
                     </div>
-                    <FileUpload
-                        mode="basic"
-                        @select="onFileSelect"
-                        customUpload
-                        auto
-                        chooseLabel="Cargar"
-                        class="!h-[3.2rem]"
-                        chooseIcon="pi pi-cloud-upload"
-                        :chooseButtonProps="{
-                            class: 'p-button-secondary w-full mt-4'
-                        }"
-                        v-if="!src"
-                    />
-                    <Button
-                        icon="pi pi-trash"
-                        variant="outlined"
-                        severity="danger"
-                        label="Quitar Imagen"
-                        @click="src = null"
-                        class="!h-[3.2rem] w-full mt-4"
-                        v-else
-                    />
+                    <img :src="src" class="object-cover w-full h-full" alt="logo" v-else />
                 </div>
-                <div class="flex justify-end gap-4">
-                    <Button
-                        severity="secondary"
-                        class="!h-[3.2rem]"
-                        label="Cancelar"
-                        variant="outlined"
-                        as="router-link"
-                        to="/admin/products"
-                    />
-                    <Button
-                        severity="primary"
-                        type="submit"
-                        :loading
-                        class="!h-[3.2rem]"
-                        label="Guardar Producto"
-                    />
-                </div>
+                <FileUpload
+                    mode="basic"
+                    @select="onFileSelect"
+                    customUpload
+                    auto
+                    chooseLabel="Cargar"
+                    class="!h-[3.2rem]"
+                    chooseIcon="pi pi-cloud-upload"
+                    :chooseButtonProps="{
+                        class: 'p-button-secondary w-full mt-4'
+                    }"
+                    v-if="!src"
+                />
+                <Button
+                    icon="pi pi-trash"
+                    variant="outlined"
+                    severity="danger"
+                    label="Quitar Imagen"
+                    @click="src = null"
+                    class="!h-[3.2rem] w-full mt-4"
+                    v-else
+                />
+            </div>
+            <div class="flex justify-end gap-4">
+                <Button
+                    severity="secondary"
+                    class="!h-[3.2rem]"
+                    label="Cancelar"
+                    variant="outlined"
+                    as="router-link"
+                    to="/admin/products"
+                />
+                <Button
+                    severity="primary"
+                    type="submit"
+                    :loading
+                    class="!h-[3.2rem]"
+                    label="Guardar Producto"
+                />
             </div>
         </div>
     </Form>
 </template>
 <script setup>
 import pb from '@/service/pocketbase';
+import getFileUrl from '@/utils/getFileUrl';
 import { Form } from '@primevue/forms';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useToast } from 'primevue/usetoast';
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import z from 'zod';
 const toast = useToast();
 const router = useRouter();
+const route = useRoute();
 const categories = ref([]);
-const loading = ref(false);
-const loadingCategories = ref(false);
+const productData = ref(null);
+const src = ref(null);
 const imagen = ref(null);
-const initialValues = {
-    nombre: '',
-    codigo: null,
-    categoria: null,
-    descripcion: '',
-    costo: null,
-    precio: null,
-    activo: true
-};
+const loading = ref(false);
+const form = ref(null);
+const loadingCategories = ref(false);
+const isEditMode = computed(() => (route.params?.id ? true : false));
+const initialValues = computed(() => {
+    return {
+        nombre: productData.value?.nombre ?? '',
+        codigo: productData.value?.codigo ?? null,
+        categoria_id: productData.value?.categoria_id ?? null,
+        descripcion: productData.value?.descripcion ?? '',
+        costo: productData.value?.costo ?? null,
+        precio: productData.value?.precio ?? null,
+        activo: productData.value?.activo ?? true
+    };
+});
 const resolver = zodResolver(
     z.object({
         nombre: z
@@ -217,7 +224,6 @@ const resolver = zodResolver(
         activo: z.boolean()
     })
 );
-const src = ref(null);
 function onFileSelect(event) {
     const file = event.files[0];
     const reader = new FileReader();
@@ -232,11 +238,16 @@ const onFormSubmit = async (event) => {
     try {
         loading.value = true;
         const payload = { ...event.values, imagen: imagen.value };
-        await pb.collection('productos').create(payload);
+        if (src.value && !imagen.value) {
+            delete payload.imagen;
+        }
+        isEditMode.value
+            ? await pb.collection('productos').update(route?.params?.id, payload)
+            : await pb.collection('productos').create(payload);
         toast.add({
             severity: 'success',
             summary: 'Operación exitosa',
-            detail: 'El producto se ha creado correctamente',
+            detail: `El producto se ha ${isEditMode.value ? 'editado' : 'creado'} correctamente`,
             life: 3000
         });
         router.push('/admin/products');
@@ -252,6 +263,36 @@ const onFormSubmit = async (event) => {
         loading.value = false;
     }
 };
+
+const fetchData = async () => {
+    if (!isEditMode.value) {
+        productData.value = null;
+        src.value = null;
+        return;
+    }
+    try {
+        loading.value = true;
+        const result = await pb.collection('productos').getOne(route?.params?.id);
+        productData.value = result;
+        form.value.setValues({
+            ...initialValues.value
+        });
+        src.value = result.imagen
+            ? getFileUrl(result.collectionId, result.id, result.imagen)
+            : null;
+    } catch (error) {
+        console.log(error);
+        toast.add({
+            severity: 'error',
+            summary: 'Operación fallida',
+            detail: 'No se pudo obtener el producto',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+watch(() => route.params?.id, fetchData, { immediate: true });
 onMounted(async () => {
     try {
         loadingCategories.value = true;

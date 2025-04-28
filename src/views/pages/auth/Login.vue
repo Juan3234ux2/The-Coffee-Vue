@@ -29,12 +29,10 @@ const onFormSubmit = async (e) => {
     if (e.valid) {
         try {
             loading.value = true;
-
             const authData = await pb
                 .collection('users')
                 .authWithPassword(e.values.email, e.values.password, {
-                    expand: 'role, role.permisos, sucursal_id',
-                    fields: '*, expand.role.expand.permisos.permiso, expand.role.nombre, expand.role.id, expand.sucursal_id'
+                    expand: 'role, role.permisos, sucursal_id'
                 });
 
             store.setUserLogged(authData.record);
@@ -66,7 +64,6 @@ const googleLogin = async () => {
         router.push({ name: 'dashboard' });
     } catch (error) {
         console.error(error);
-
         toast.add({
             severity: 'error',
             summary: 'Operación fallida',

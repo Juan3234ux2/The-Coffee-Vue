@@ -49,6 +49,7 @@
                     v-model="selectedStatus"
                     optionLabel="label"
                     optionValue="value"
+                    show-clear
                     @update:model-value="searchProducts"
                     :options="[
                         {
@@ -80,7 +81,7 @@ const searchInput = ref('');
 const categories = ref([]);
 const loadingCategories = ref(false);
 const selectedCategories = ref(null);
-const selectedStatus = ref(1);
+const selectedStatus = ref(null);
 const toast = useToast();
 const searchProducts = debounce(() => {
     productList.value.getProducts({

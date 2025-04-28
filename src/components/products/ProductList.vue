@@ -13,7 +13,7 @@
         currentPageReportTemplate="Mostrando {last} de {totalRecords} productos"
     >
         <template #empty> Sin registros. </template>
-        <Column field="codigo" class="w-28" header="Cód."> </Column>
+        <Column field="codigo" header="Cód."> </Column>
         <Column field="nombre" header="Producto"> </Column>
         <Column header="Categoría">
             <template #body="{ data }">
@@ -40,6 +40,14 @@
                 {{ formatCurrency(data.precio) }}
             </template>
         </Column>
+        <Column header="Estado">
+            <template #body="{ data }">
+                <Tag
+                    :value="data.activo ? 'Activo' : 'Inactivo'"
+                    :severity="data.activo ? 'success' : 'danger'"
+                ></Tag>
+            </template>
+        </Column>
         <Column class="w-32">
             <template #header> <p class="mx-auto font-semibold">Acciones</p> </template>
             <template #body="{ data }">
@@ -51,6 +59,8 @@
                         rounded
                         v-tooltip.top="'Editar Producto'"
                         size="large"
+                        as="router-link"
+                        :to="`/admin/products/edit/${data.id}`"
                     />
                     <Button
                         icon="pi pi-trash"
@@ -94,7 +104,7 @@ const getProducts = async (event) => {
         const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
         const result = await pb.collection('productos').getList(currentPage, rowsPerPage.value, {
             sort: '-created',
-            filter: `(nombre~'${search ?? ''}' || codigo~'${search ?? ''}') && activo='${event.status ?? 1}' && deleted=null ${categoryFilter}`,
+            filter: `(nombre~'${search ?? ''}' || codigo~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null ${categoryFilter}`,
             fields: 'id,codigo, nombre, precio, costo, expand.categoria_id, activo, categoria_id',
             expand: 'categoria_id'
         });
