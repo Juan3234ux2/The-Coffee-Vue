@@ -19,7 +19,6 @@ const logout = () => {
     pb.authStore.clear();
     store.setUserLogged(null);
 };
-
 onMounted(async () => {
     const router = useRouter();
     try {
@@ -55,6 +54,13 @@ onMounted(async () => {
             <router-link to="/" class="layout-topbar-logo">
                 <span class="font-bold text-black italic">The Coffee</span>
             </router-link>
+            <div class="flex flex-col" v-else>
+                <p class="text-primary font-bold !m-0" style="font-size: 1.2rem">
+                    {{ store.currentGym?.nombre }}
+                    {{ getGreeting() }}, {{ store.getUserLogged?.name }}
+                </p>
+                <p class="text-sm text-muted-color">Bienvenido, me alegro de verte de nuevo</p>
+            </div>
         </div>
 
         <IconField class="hidden lg:block">
