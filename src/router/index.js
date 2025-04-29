@@ -42,9 +42,20 @@ const router = createRouter({
             component: () => import('@/views/pages/Landing.vue')
         },
         {
-            path: '/auth/login',
-            name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
+            path: '/auth',
+            component: () => import('@/layout/AuthLayout.vue'),
+            children: [
+                {
+                    path: 'register',
+                    name: 'register',
+                    component: () => import('@/views/pages/auth/Register.vue')
+                },
+                {
+                    path: 'login',
+                    name: 'login',
+                    component: () => import('@/views/pages/auth/Login.vue')
+                }
+            ]
         },
         {
             path: '/auth/access',
@@ -58,5 +69,4 @@ const router = createRouter({
         }
     ]
 });
-
 export default router;
