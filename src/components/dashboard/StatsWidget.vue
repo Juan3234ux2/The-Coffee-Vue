@@ -3,12 +3,24 @@
         <div class="card mb-0">
             <div class="flex justify-between">
                 <div>
-                    <span class="stat-title">Recaudado</span>
-                    <div class="stat-info">$2.100</div>
+                    <span class="stat-title">Total Recaudado</span>
+                    <div class="stat-info">$15.100</div>
                 </div>
-                <i class="pi pi-dollar !text-xl"></i>
+                <i class="pi pi-dollar stat-icon"></i>
             </div>
-            <span class="text-muted-color">+20.1% vs mes anterior</span>
+            <span class="text-green-700 font-semibold">+20.1% vs mes anterior</span>
+        </div>
+    </div>
+    <div class="col-span-12 xl:col-span-4">
+        <div class="card mb-0">
+            <div class="flex justify-between">
+                <div>
+                    <span class="stat-title">Total Gastado</span>
+                    <div class="stat-info">$10.000</div>
+                </div>
+                <i class="pi pi-wallet stat-icon"></i>
+            </div>
+            <span class="text-red-700 font-semibold">-4.3% vs mes anterior</span>
         </div>
     </div>
     <div class="col-span-12 xl:col-span-4">
@@ -18,21 +30,9 @@
                     <span class="stat-title">Pedidos</span>
                     <div class="stat-info">152</div>
                 </div>
-                <i class="pi pi-shopping-cart !text-xl"></i>
+                <i class="pi pi-shopping-bag stat-icon"></i>
             </div>
-            <span class="text-muted-color">+20.1% vs mes anterior</span>
-        </div>
-    </div>
-    <div class="col-span-12 xl:col-span-4">
-        <div class="card mb-0">
-            <div class="flex justify-between">
-                <div>
-                    <span class="stat-title">Clientes</span>
-                    <div class="stat-info">28441</div>
-                </div>
-                <i class="pi pi-users !text-xl"></i>
-            </div>
-            <span class="text-muted-color">+20.1% vs mes anterior</span>
+            <span class="text-green-700 font-semibold">+10.1% vs mes anterior</span>
         </div>
     </div>
 </template>
@@ -42,5 +42,8 @@
 }
 .stat-info {
     @apply block  font-semibold text-black text-3xl mb-3;
+}
+.stat-icon {
+    @apply !text-xl text-primary rounded-full border bg-surface-100 h-fit px-2 py-1;
 }
 </style>

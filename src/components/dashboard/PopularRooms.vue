@@ -1,11 +1,11 @@
 <template>
     <div class="card col-span-12 xl:col-span-4 h-fit !mb-2">
-        <div class="font-semibold text-black text-xl mb-4">Categorias Populares</div>
+        <div class="font-semibold text-black text-xl mb-4">Salas Populares</div>
         <Chart
             type="doughnut"
             :data="chartData"
             :options="chartOptions"
-            class="mx-auto w-[20rem] xl:h-[21rem]"
+            class="mx-auto w-[20rem] xl:h-[20.6rem]"
         />
     </div>
 </template>
@@ -25,19 +25,18 @@ const setChartData = () => {
     const documentStyle = getComputedStyle(document.body);
 
     return {
-        labels: ['Bebidas', 'Cafetería', 'Pastelería'],
+        labels: ['Balcón', 'Terraza'],
         datasets: [
             {
-                data: [540, 325, 702],
+                data: [540, 325],
                 backgroundColor: [
-                    documentStyle.getPropertyValue('--p-primary-500'),
-                    documentStyle.getPropertyValue('--p-lime-500'),
-                    documentStyle.getPropertyValue('--p-black')
+                    documentStyle.getPropertyValue('--p-black'),
+                    documentStyle.getPropertyValue('--p-primary-500')
                 ],
                 hoverBackgroundColor: [
-                    documentStyle.getPropertyValue('--p-primary-400'),
-                    documentStyle.getPropertyValue('--p-lime-400'),
-                    documentStyle.getPropertyValue('--p-black')
+                    documentStyle.getPropertyValue('--p-black'),
+
+                    documentStyle.getPropertyValue('--p-primary-400')
                 ]
             }
         ]

@@ -1,4 +1,5 @@
 import AppLayout from '@/layout/AppLayout.vue';
+import pb from '@/service/pocketbase';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -42,9 +43,25 @@ const router = createRouter({
             component: () => import('@/views/pages/Landing.vue')
         },
         {
-            path: '/auth/login',
-            name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
+            path: '/auth',
+            component: () => import('@/layout/AuthLayout.vue'),
+            children: [
+                {
+                    path: 'register',
+                    name: 'register',
+                    component: () => import('@/views/pages/auth/Register.vue')
+                },
+                {
+                    path: 'login',
+                    name: 'login',
+                    component: () => import('@/views/pages/auth/Login.vue')
+                },
+                {
+                    path: 'complete-registration',
+                    name: 'complete-registration',
+                    component: () => import('@/views/pages/auth/CompleteRegistration.vue')
+                }
+            ]
         },
         {
             path: '/auth/access',
@@ -58,5 +75,14 @@ const router = createRouter({
         }
     ]
 });
-
+router.beforeEach(async (to, from, next) => {
+    const loggedIn = pb.authStore.isValid;
+    if (loggedIn && to.name === 'login') {
+        return next({ name: 'dashboard' });
+    }
+    if (to.name === 'accessDenied' && loggedIn) {
+        return next({ name: 'dashboard' });
+    }
+    next();
+});
 export default router;

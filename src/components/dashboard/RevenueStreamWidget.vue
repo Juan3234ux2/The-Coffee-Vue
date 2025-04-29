@@ -1,8 +1,5 @@
 <script setup>
-import { useLayout } from '@/layout/composables/layout';
-import { onMounted, ref, watch } from 'vue';
-
-const { getPrimary, getSurface, isDarkTheme } = useLayout();
+import { onMounted, ref } from 'vue';
 
 const chartData = ref(null);
 const chartOptions = ref(null);
@@ -11,32 +8,13 @@ function setChartData() {
     const documentStyle = getComputedStyle(document.documentElement);
 
     return {
-        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+        labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
         datasets: [
             {
                 type: 'bar',
-                label: 'Subscriptions',
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-400'),
-                data: [4000, 10000, 15000, 4000],
-                barThickness: 32
-            },
-            {
-                type: 'bar',
-                label: 'Advertising',
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-300'),
-                data: [2100, 8400, 2400, 7500],
-                barThickness: 32
-            },
-            {
-                type: 'bar',
-                label: 'Affiliate',
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-                data: [4100, 5200, 3400, 7400],
-                borderRadius: {
-                    topLeft: 8,
-                    topRight: 8
-                },
-                borderSkipped: true,
+                label: 'Pedidos',
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
+                data: [30, 50, 20, 20, 60, 100, 90],
                 barThickness: 32
             }
         ]
@@ -45,12 +23,16 @@ function setChartData() {
 
 function setChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
-    const borderColor = documentStyle.getPropertyValue('--surface-border');
     const textMutedColor = documentStyle.getPropertyValue('--text-color-secondary');
 
     return {
         maintainAspectRatio: false,
-        aspectRatio: 0.8,
+
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
         scales: {
             x: {
                 stacked: true,
@@ -58,8 +40,7 @@ function setChartOptions() {
                     color: textMutedColor
                 },
                 grid: {
-                    color: 'transparent',
-                    borderColor: 'transparent'
+                    display: false
                 }
             },
             y: {
@@ -68,19 +49,12 @@ function setChartOptions() {
                     color: textMutedColor
                 },
                 grid: {
-                    color: borderColor,
-                    borderColor: 'transparent',
-                    drawTicks: false
+                    display: false
                 }
             }
         }
     };
 }
-
-watch([getPrimary, getSurface, isDarkTheme], () => {
-    chartData.value = setChartData();
-    chartOptions.value = setChartOptions();
-});
 
 onMounted(() => {
     chartData.value = setChartData();
@@ -89,8 +63,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="card">
-        <div class="font-semibold text-xl mb-4">Revenue Stream</div>
+    <div class="card !mb-2">
+        <div class="flex justify-between items-center mb-6">
+            <p class="font-semibold text-xl text-black !mb-0">Pedidos por día</p>
+            <SelectButton default-value="Semanal" :options="['Semanal', 'Mensual']" />
+        </div>
         <Chart type="bar" :data="chartData" :options="chartOptions" class="h-80" />
     </div>
 </template>
