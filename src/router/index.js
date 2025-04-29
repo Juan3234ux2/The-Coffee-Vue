@@ -34,6 +34,11 @@ const router = createRouter({
                             component: () => import('@/views/pages/ProductForm.vue')
                         }
                     ]
+                },
+                {
+                    path: 'categories',
+                    name: 'categories',
+                    component: () => import('@/views/pages/Categories.vue')
                 }
             ]
         },
@@ -77,12 +82,22 @@ const router = createRouter({
 });
 router.beforeEach(async (to, from, next) => {
     const loggedIn = pb.authStore.isValid;
-    if (loggedIn && to.name === 'login') {
+    const isComplete = pb.authStore?.record?.register_completed;
+    if (loggedIn && to.name === 'login' && isComplete) {
         return next({ name: 'dashboard' });
     }
-    if (to.name === 'accessDenied' && loggedIn) {
-        return next({ name: 'dashboard' });
+    if (
+        loggedIn &&
+        !isComplete &&
+        to.name !== 'complete-registration' &&
+        to.fullPath.includes('/admin')
+    ) {
+        return next({ name: 'complete-registration' });
     }
+    if (to.fullPath.includes('/admin') && !loggedIn) {
+        return next({ name: 'login' });
+    }
+
     next();
 });
 export default router;

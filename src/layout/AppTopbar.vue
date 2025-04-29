@@ -5,7 +5,7 @@ import { useIndexStore } from '@/storage';
 import getFileUrl from '@/utils/getFileUrl';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-const { toggleMenu, layoutState } = useLayout();
+const { toggleMenu } = useLayout();
 const store = useIndexStore();
 const avatar = ref(null);
 const loading = ref(false);
@@ -24,7 +24,6 @@ onMounted(async () => {
     try {
         loading.value = true;
         if (!store.userLogged && pb.authStore.isValid) {
-            const store = useIndexStore();
             const user = await pb.collection('users').getOne(pb.authStore.record.id);
             store.setUserLogged(user);
         }
@@ -54,13 +53,6 @@ onMounted(async () => {
             <router-link to="/" class="layout-topbar-logo">
                 <span class="font-bold text-black italic">The Coffee</span>
             </router-link>
-            <div class="flex flex-col" v-else>
-                <p class="text-primary font-bold !m-0" style="font-size: 1.2rem">
-                    {{ store.currentGym?.nombre }}
-                    {{ getGreeting() }}, {{ store.getUserLogged?.name }}
-                </p>
-                <p class="text-sm text-muted-color">Bienvenido, me alegro de verte de nuevo</p>
-            </div>
         </div>
 
         <IconField class="hidden lg:block">

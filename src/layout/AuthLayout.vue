@@ -43,8 +43,7 @@
         <div
             class="flex flex-col justify-center grow sm:max-w-[80%] md:max-w-[60%] xl:max-w-[40%] px-10 mx-auto transition-transform duration-500"
             :class="{
-                '!min-w-screen': $route.name == 'complete-registration',
-                '!mx-0': $route.name == 'complete-registration',
+                '!min-w-screen !mx-0 !px-0': $route.name == 'complete-registration',
                 'translate-x-0': isMobile || $route.name === 'login',
                 '-translate-x-[50vw]': !isMobile && $route.name === 'register'
             }"

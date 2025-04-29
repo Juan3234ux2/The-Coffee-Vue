@@ -1,7 +1,7 @@
 <template>
     <div class="card">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl text-black font-bold">Productos</h1>
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-4xl text-black font-bold !mb-0">Productos</h1>
             <div class="flex gap-4">
                 <Button
                     severity="secondary"
