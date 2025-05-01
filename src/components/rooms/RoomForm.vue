@@ -4,7 +4,7 @@
         modal
         :draggable="false"
         @update:visible="closeModal"
-        :header="isEditMode ? 'Editar Categoría' : 'Agregar Categoría'"
+        :header="isEditMode ? 'Editar Sala' : 'Agregar Sala'"
         :style="{ width: '38rem' }"
     >
         <Form
@@ -20,7 +20,7 @@
                 <InputText
                     id="name"
                     name="nombre"
-                    placeholder="Ingrese el nombre de la categoría"
+                    placeholder="Ingrese el nombre de la sala"
                     fluid
                     autocomplete="off"
                 />
@@ -66,7 +66,7 @@ const visible = computed({
 });
 const props = defineProps({
     visible: Boolean,
-    categoryData: {
+    roomData: {
         type: Object,
         default: []
     }
@@ -78,19 +78,19 @@ const resolver = zodResolver(
         nombre: z
             .string()
             .nonempty({ message: 'El nombre es requerido.' })
-            .min(5, { message: 'Debe tener al menos 5 caracteres' })
+            .min(3, { message: 'Debe tener al menos 3 caracteres' })
             .max(50, { message: 'No debe exceder 50 caracteres' })
     })
 );
 
 const isEditMode = computed(() => {
-    return props.categoryData.length != 0 ? true : false;
+    return props.roomData.length != 0 ? true : false;
 });
 
 const initialValues = computed(() => {
     return {
-        id: props.categoryData?.id || '',
-        nombre: props.categoryData?.nombre || ''
+        id: props.roomData?.value || '',
+        nombre: props.roomData?.label || ''
     };
 });
 
@@ -103,16 +103,16 @@ const onFormSubmit = async (e) => {
     try {
         const payload = e.values;
         loading.value = true;
-        const category = isEditMode.value
-            ? await pb.collection('categorias').update(payload.id, payload)
-            : await pb.collection('categorias').create(payload);
+        const room = isEditMode.value
+            ? await pb.collection('salas').update(payload.id, payload)
+            : await pb.collection('salas').create(payload);
         toast.add({
             severity: 'success',
             summary: 'Operación exitosa',
-            detail: `La categoría se ha ${isEditMode.value ? 'editado' : 'creado'} correctamente`,
+            detail: `La sala se ha ${isEditMode.value ? 'editado' : 'creado'} correctamente`,
             life: 3000
         });
-        emit('newChanges', isEditMode.value, category);
+        emit('newChanges', room);
     } catch (error) {
         toast.add({
             severity: 'error',

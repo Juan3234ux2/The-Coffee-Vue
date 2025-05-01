@@ -1,0 +1,133 @@
+<template>
+    <DataTable
+        :value="customers"
+        paginator
+        :rows="rowsPerPage"
+        :lazy="true"
+        :totalRecords="totalRecords"
+        :first="first"
+        :loading
+        @page="getCustomers"
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        :rowsPerPageOptions="[10, 30, 50]"
+        currentPageReportTemplate="Mostrando {last} de {totalRecords} clientes"
+    >
+        <template #empty> Sin registros. </template>
+        <Column field="nombre" header="Cliente"> </Column>
+        <Column field="identificacion" header="Identificación"> </Column>
+        <Column field="email" header="Email"> </Column>
+        <Column field="telefono" header="Teléfono"> </Column>
+        <Column header="Estado">
+            <template #body="{ data }">
+                <Tag
+                    :value="data.activo ? 'Activo' : 'Inactivo'"
+                    :severity="data.activo ? 'success' : 'danger'"
+                ></Tag>
+            </template>
+        </Column>
+        <Column class="w-32">
+            <template #header> <p class="mx-auto font-semibold">Acciones</p> </template>
+            <template #body="{ data }">
+                <div class="flex justify-center gap-2">
+                    <Button
+                        icon="pi pi-eye"
+                        severity="secondary"
+                        variant="outlined"
+                        rounded
+                        @click="$emit('editCliente', data)"
+                        v-tooltip.top="'Ver Cliente'"
+                        size="large"
+                    />
+                    <Button
+                        icon="pi pi-pencil"
+                        severity="secondary"
+                        variant="outlined"
+                        rounded
+                        @click="$emit('editCustomer', data)"
+                        v-tooltip.top="'Editar Cliente'"
+                        size="large"
+                    />
+                    <Button
+                        icon="pi pi-trash"
+                        severity="secondary"
+                        variant="outlined"
+                        rounded
+                        @click="deleteCustomer(data)"
+                        v-tooltip.top="'Eliminar Cliente'"
+                        size="large"
+                    />
+                </div>
+            </template>
+        </Column>
+    </DataTable>
+    <ConfirmDialog></ConfirmDialog>
+</template>
+<script setup>
+import pb from '@/service/pocketbase.js';
+import { useConfirm } from 'primevue';
+import { useToast } from 'primevue/usetoast';
+import { defineExpose, onMounted, ref } from 'vue';
+const customers = ref([]);
+const confirm = useConfirm();
+const first = ref(0);
+const loading = ref(false);
+const totalRecords = ref(0);
+const rowsPerPage = ref(10);
+const toast = useToast();
+onMounted(() => getCustomers({ first: first.value, rows: rowsPerPage.value }));
+
+const getCustomers = async (event) => {
+    try {
+        first.value = event.first;
+        rowsPerPage.value = event.rows ?? rowsPerPage.value;
+        loading.value = true;
+        const search = event.search;
+        const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
+        const result = await pb.collection('clientes').getList(currentPage, rowsPerPage.value, {
+            sort: '-created',
+            filter: `(nombre~'${search ?? ''}' || identificacion~'${search ?? ''}' || email~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null`
+        });
+        totalRecords.value = result.totalItems;
+        customers.value = result.items;
+    } catch (error) {
+        console.log(error);
+        if (!error.message.includes('The request was autocancelled')) {
+            toast.add({
+                severity: 'error',
+                summary: 'Operación fallida',
+                detail: 'No se pudo obtener los clientes',
+                life: 3000
+            });
+        }
+    } finally {
+        loading.value = false;
+    }
+};
+const deleteCustomer = (data) => {
+    confirm.require({
+        message: `Estas seguro de eliminar al cliente ${data.nombre}?`,
+        header: 'Eliminar Cliente',
+        icon: 'pi pi-info-circle',
+        rejectProps: {
+            label: 'Cancelar',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Eliminar',
+            severity: 'danger'
+        },
+        accept: async () => {
+            await pb.collection('clientes').update(data.id, { deleted: new Date() });
+            getCustomers({ first: first.value, rows: rowsPerPage.value });
+            toast.add({
+                severity: 'success',
+                summary: 'Operación exitosa',
+                detail: 'El cliente ha sido eliminada',
+                life: 3000
+            });
+        }
+    });
+};
+defineExpose({ getCustomers });
+</script>

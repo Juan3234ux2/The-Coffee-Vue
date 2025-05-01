@@ -296,7 +296,9 @@ watch(() => route.params?.id, fetchData, { immediate: true });
 onMounted(async () => {
     try {
         loadingCategories.value = true;
-        const result = await pb.collection('categorias').getFullList();
+        const result = await pb.collection('categorias').getFullList({
+            filter: 'deleted=null'
+        });
         categories.value = result;
     } catch (error) {
         console.log(error);

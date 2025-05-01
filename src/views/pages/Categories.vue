@@ -26,7 +26,6 @@
                     class="min-w-[350px]"
                 />
             </IconField>
-            <div class="flex gap-4"></div>
         </div>
         <CategoryList ref="categoryList" @editCategory="editCategory" />
         <CategoryForm
@@ -34,12 +33,18 @@
             :categoryData
             @editCategory="editCategory"
             @closeModal="closeModal"
-            @newChanges="searchCategories"
+            @newChanges="
+                () => {
+                    categoryList.getCategories({ first: 0, rows: null });
+                    searchInput = '';
+                }
+            "
         />
     </div>
 </template>
 
 <script setup>
+import CategoryForm from '@/components/categories/CategoryForm.vue';
 import CategoryList from '@/components/categories/CategoryList.vue';
 import debounce from '@/utils/debounce';
 import { ref } from 'vue';
