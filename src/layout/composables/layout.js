@@ -43,14 +43,16 @@ export function useLayout() {
             layoutState.overlayMenuActive = !layoutState.overlayMenuActive;
         }
 
-        if (window.innerWidth > 991) {
+        if (window.innerWidth >= 1200) {
             layoutState.staticMenuDesktopInactive = !layoutState.staticMenuDesktopInactive;
         } else {
             layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
         }
     };
 
-    const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
+    const isSidebarActive = computed(
+        () => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive
+    );
 
     const isDarkTheme = computed(() => layoutConfig.darkTheme);
 

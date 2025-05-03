@@ -73,6 +73,7 @@ const confirmRoomDeletion = () => {
     });
 };
 const getTables = async (salaId) => {
+    selectedTable.value = null;
     try {
         const result = await pb.collection('mesas').getFullList({
             filter: `sala_id = "${salaId}"`
@@ -109,6 +110,8 @@ const handleCellClick = async (index) => {
         const newTable = await pb.collection('mesas').create({
             sala_id: value.value,
             numero: biggestNumber + 1,
+            tamanio: 'Grande',
+            forma: 'Cuadrada',
             pos_x: x,
             pos_y: y,
             cantidad_sillas: 4,
@@ -131,75 +134,139 @@ onMounted(getRooms);
 </script>
 
 <template>
-    <div></div>
-    <div class="card">
-        <div class="flex justify-between items-center !mb-4">
-            <h1 class="text-4xl text-black font-bold !mb-0">Salas y Mesas</h1>
-            <div class="flex gap-2">
-                <Button
-                    severity="danger"
-                    class="!h-[3.2rem]"
-                    label="Eliminar Sala"
-                    icon="pi pi-trash"
-                    @click="confirmRoomDeletion()"
-                />
+    <div class="card flex gap-4 !mb-0">
+        <div class="w-2/3">
+            <div class="flex justify-between items-center !mb-4">
+                <h1 class="text-4xl text-black font-bold !mb-0">Salas y Mesas</h1>
                 <Button
                     severity="contrast"
-                    class="!h-[3.2rem]"
-                    label="Editar Sala"
-                    icon="pi pi-pencil"
-                    @click="editRoom()"
-                />
-                <Button
-                    severity="primary"
                     class="!h-[3.2rem]"
                     label="Agregar Sala"
                     icon="pi pi-plus"
                     @click="showModalRoom = true"
                 />
             </div>
-        </div>
 
-        <SelectButton
-            v-model="value"
-            :options="options"
-            @update:modelValue="getTables(value)"
-            optionLabel="label"
-            optionValue="value"
-            class="mt-2 mb-10"
-        />
+            <SelectButton
+                v-model="value"
+                :options="options"
+                @update:modelValue="getTables(value)"
+                :allowEmpty="false"
+                optionLabel="label"
+                optionValue="value"
+                class="mt-2 mb-10"
+            />
 
-        <div class="overflow-auto max-h-[50vh]">
-            <div class="grid-celda border">
-                <div
-                    v-for="(_, index) in 100"
-                    :key="index"
-                    class="celda"
-                    @click="handleCellClick(index)"
-                >
+            <div class="overflow-auto max-h-[50vh]">
+                <div class="grid-celda border">
                     <div
-                        v-if="tableInCell(index % 15, Math.floor(index / 15))"
-                        style="box-shadow: 0px -2px 6px 2px rgba(0, 0, 0, 0.64) inset"
-                        class="flex justify-center items-center text-xl font-semibold text-white bg-surface-500 rounded w-[80%] h-[80%] relative"
+                        v-for="(_, index) in 100"
+                        :key="index"
+                        class="celda"
+                        @click="handleCellClick(index)"
                     >
-                        {{ tableInCell(index % 15, Math.floor(index / 15)).numero }}
                         <div
-                            class="cellRing"
-                            v-if="selectedTable == tableInCell(index % 15, Math.floor(index / 15))"
-                        ></div>
+                            v-if="tableInCell(index % 15, Math.floor(index / 15))"
+                            style="box-shadow: 0px -2px 6px 2px rgba(0, 0, 0, 0.64) inset"
+                            class="flex justify-center items-center text-xl font-semibold text-white bg-surface-500 rounded w-[80%] h-[80%] relative"
+                        >
+                            {{ tableInCell(index % 15, Math.floor(index / 15)).numero }}
+                            <div
+                                class="cellRing"
+                                v-if="
+                                    selectedTable == tableInCell(index % 15, Math.floor(index / 15))
+                                "
+                            ></div>
+                        </div>
+                        <div class="flex justify-center items-center" v-else></div>
                     </div>
-                    <div class="flex justify-center items-center" v-else></div>
                 </div>
             </div>
         </div>
-
-        <RoomForm
-            :visible="showModalRoom"
-            :roomData
-            @newChanges="newRoom"
-            @closeModal="showModalRoom = false"
-        />
+        <div class="w-1/3" v-auto-animate>
+            <div
+                class="bg-primary-500 w-full flex justify-between items-center !h-[3.2rem] px-2 rounded-md mb-4"
+            >
+                <p class="text-white font-bold !mb-0 px-2">
+                    {{ options.find((o) => o.value === value)?.label }}
+                </p>
+                <div class="flex gap-2">
+                    <Button
+                        variant="text"
+                        icon="pi pi-pencil"
+                        class="!text-white hover:!bg-primary-700"
+                        rounded
+                        @click="editRoom()"
+                        v-tooltip.top="'Editar Sala'"
+                    />
+                    <Button
+                        variant="text"
+                        icon="pi pi-trash"
+                        class="!text-white hover:!bg-primary-700"
+                        rounded
+                        @click="confirmRoomDeletion()"
+                        v-tooltip.top="'Eliminar Sala'"
+                    />
+                </div>
+            </div>
+            <div class="flex flex-col gap-4" v-if="selectedTable" v-auto-animate>
+                <div
+                    class="bg-surface-500 w-full flex justify-between items-center !h-[3.2rem] px-2 rounded-md"
+                >
+                    <p class="text-white font-bold !mb-0 px-2">Mesa {{ selectedTable?.numero }}</p>
+                    <div class="flex gap-2">
+                        <Button
+                            variant="text"
+                            icon="pi pi-pencil"
+                            class="!text-white hover:!bg-surface-700"
+                            rounded
+                        />
+                        <Button
+                            variant="text"
+                            icon="pi pi-trash"
+                            class="!text-white hover:!bg-surface-700"
+                            rounded
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex flex-col gap-3 px-4 text-surface-500 font-semibold">
+                        <p class="!mb-0">Número:</p>
+                        <p class="!mb-0">Capacidad:</p>
+                        <p class="!mb-0">Sala:</p>
+                        <p class="!mb-0">Forma:</p>
+                        <p class="!mb-0">Tamaño:</p>
+                    </div>
+                    <div class="flex flex-col gap-3 font-bold text-black">
+                        <p class="!mb-0">
+                            {{ selectedTable?.numero }}
+                        </p>
+                        <p class="!mb-0">
+                            {{ selectedTable?.cantidad_sillas }}
+                        </p>
+                        <p class="!mb-0">
+                            {{ options.find((o) => o.value === value)?.label }}
+                        </p>
+                        <p class="!mb-0">
+                            {{ selectedTable?.forma }}
+                        </p>
+                        <p class="!mb-0">
+                            {{ selectedTable?.tamanio }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <p v-else class="text-center mt-4 font-bold text-black">
+                Seleccione una mesa para ver sus detalles
+            </p>
+        </div>
     </div>
+    <RoomForm
+        :visible="showModalRoom"
+        :roomData
+        @newChanges="newRoom"
+        @closeModal="showModalRoom = false"
+    />
     <ConfirmDialog></ConfirmDialog>
 </template>
 
