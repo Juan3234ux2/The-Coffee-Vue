@@ -11,6 +11,7 @@
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         :rowsPerPageOptions="[10, 30, 50]"
         currentPageReportTemplate="Mostrando {last} de {totalRecords} clientes"
+        class="text-nowrap"
     >
         <template #empty> Sin registros. </template>
         <Column field="nombre" header="Cliente"> </Column>
@@ -34,7 +35,7 @@
                         severity="secondary"
                         variant="outlined"
                         rounded
-                        @click="$emit('editCliente', data)"
+                        @click="$emit('viewCustomer', data)"
                         v-tooltip.top="'Ver Cliente'"
                         size="large"
                     />

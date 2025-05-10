@@ -121,6 +121,7 @@
                 <Select
                     :loading="loadingSelectData"
                     :options="cashRegisters"
+                    empty-message="No se encontraron cajas"
                     option-label="nombre"
                     option-value="id"
                     show-clear

@@ -4,11 +4,7 @@
         modal
         :draggable="false"
         @update:visible="closeModal"
-        :header="
-            isEditMode
-                ? 'Editar ' + collection.charAt(0).toUpperCase() + collection.slice(1)
-                : 'Agregar ' + collection.charAt(0).toUpperCase() + collection.slice(1)
-        "
+        :header="isEditMode ? 'Editar Turno' : 'Agregar Turno'"
         :style="{ width: '30rem' }"
     >
         <Form
@@ -24,13 +20,50 @@
                 <InputText
                     id="name"
                     name="nombre"
-                    :placeholder="'Ingrese el nombre de la ' + collection"
+                    placeholder="Ej. Mañana"
                     fluid
                     autocomplete="off"
                 />
 
                 <Message v-if="$form.nombre?.invalid" severity="error" size="small" variant="simple"
                     >{{ $form.nombre.error.message }}
+                </Message>
+            </div>
+            <div class="flex flex-col gap-1" v-auto-animate>
+                <label for="hora_inicio">Hora Inicio</label>
+                <DatePicker
+                    input-id="hora_inicio"
+                    name="hora_inicio"
+                    timeOnly
+                    fluid
+                    placeholder="Ingrese la hora de inicio"
+                    step-minute="15"
+                />
+                <Message
+                    v-if="$form.hora_inicio?.invalid"
+                    severity="error"
+                    size="small"
+                    variant="simple"
+                    >{{ $form.hora_inicio.error.message }}
+                </Message>
+            </div>
+            <div class="flex flex-col gap-1" v-auto-animate>
+                <label for="hora_fin">Hora Fin</label>
+                <DatePicker
+                    input-id="hora_fin"
+                    name="hora_fin"
+                    timeOnly
+                    fluid
+                    placeholder="Ingrese la hora de fin"
+                    step-minute="15"
+                />
+
+                <Message
+                    v-if="$form.hora_fin?.invalid"
+                    severity="error"
+                    size="small"
+                    variant="simple"
+                    >{{ $form.hora_fin.error.message }}
                 </Message>
             </div>
 
@@ -68,8 +101,7 @@ const loading = ref(false);
 const store = useIndexStore();
 const props = defineProps({
     visible: Boolean,
-    collection: String,
-    data: {
+    shiftData: {
         type: Object,
         default: {}
     }
@@ -85,18 +117,28 @@ const resolver = zodResolver(
             .string()
             .nonempty({ message: 'El nombre es requerido' })
             .min(3, { message: 'Debe tener al menos 3 caracteres' })
-            .max(50, { message: 'No debe exceder 50 caracteres' })
+            .max(50, { message: 'No debe exceder 50 caracteres' }),
+        hora_inicio: z.date({
+            required_error: 'La hora de inicio es obligatoria',
+            invalid_type_error: 'La hora de inicio no es válida'
+        }),
+        hora_fin: z.date({
+            required_error: 'La hora de fin es obligatoria',
+            invalid_type_error: 'La hora de fin no es válida'
+        })
     })
 );
 
 const isEditMode = computed(() => {
-    return !!props.data?.id;
+    return !!props.shiftData?.id;
 });
 
 const initialValues = computed(() => {
     return {
-        id: props.data?.id || '',
-        nombre: props.data?.nombre || ''
+        id: props.shiftData?.id || '',
+        nombre: props.shiftData?.nombre || '',
+        hora_inicio: props.shiftData?.hora_inicio ? new Date(props.shiftData?.hora_inicio) : '',
+        hora_fin: props.shiftData?.hora_fin ? new Date(props.shiftData?.hora_fin) : ''
     };
 });
 
@@ -108,16 +150,17 @@ const onFormSubmit = async (e) => {
     try {
         const payload = { ...e.values, cafeteria_id: store?.getUserLogged?.cafeteria_id };
         loading.value = true;
-        const item = isEditMode.value
-            ? await pb.collection(`${props.collection}s`).update(payload.id, payload)
-            : await pb.collection(`${props.collection}s`).create(payload);
+        isEditMode.value
+            ? await pb.collection('turnos').update(payload.id, payload)
+            : await pb.collection('turnos').create(payload);
         toast.add({
             severity: 'success',
             summary: 'Operación exitosa',
-            detail: `La ${props.collection} se ha ${isEditMode.value ? 'editado' : 'creado'} correctamente`,
+            detail: `El turno se ha ${isEditMode.value ? 'editado' : 'creado'} correctamente`,
             life: 3000
         });
-        emit('newChanges', isEditMode.value, item);
+        closeModal();
+        emit('newChanges');
     } catch (error) {
         console.log(error);
         toast.add({

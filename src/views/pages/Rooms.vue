@@ -95,7 +95,7 @@ const confirmRoomDeletion = () => {
         accept: async () => {
             await pb.collection('salas').update(data.value, { deleted: new Date() });
             options.value = options.value.filter((r) => r.value != data.value);
-            value.value = options.value[0].value;
+            value.value = options.value.length > 0 ? options.value[0].value : null;
             toast.add({
                 severity: 'success',
                 summary: 'Operación exitosa',
@@ -202,8 +202,8 @@ onMounted(getRooms);
 </script>
 
 <template>
-    <div class="card flex flex-col md:flex-row gap-4 !mb-0">
-        <div class="w-full md:w-3/5 xl:w-2/3">
+    <div class="card flex flex-col md:flex-row gap-4 !mb-0" v-auto-animate>
+        <div class="w-full md:w-3/5 xl:w-2/3 grow">
             <div class="flex justify-between items-center !mb-4">
                 <h1 class="text-4xl text-black font-bold !mb-0">Salas y Mesas</h1>
                 <Button
@@ -242,7 +242,7 @@ onMounted(getRooms);
                 </div>
             </div>
         </div>
-        <div class="w-full md:w-2/5 xl:w-1/3" v-auto-animate>
+        <div class="w-full md:w-2/5 xl:w-1/3" v-auto-animate v-if="value">
             <div
                 class="bg-surface-500 w-full flex justify-between items-center !h-[3.2rem] px-2 rounded-md mb-4"
             >

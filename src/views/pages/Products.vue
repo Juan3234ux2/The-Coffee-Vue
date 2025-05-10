@@ -19,7 +19,7 @@
                 />
             </div>
         </div>
-        <div class="flex justify-between gap-4 mt-5 mb-3">
+        <div class="flex flex-col md:flex-row justify-between gap-4 mt-5 mb-3">
             <IconField>
                 <InputIcon>
                     <i class="pi pi-search" />
@@ -28,7 +28,7 @@
                     placeholder="Buscar por nombre o código"
                     @input="searchProducts"
                     v-model="searchInput"
-                    class="min-w-[350px]"
+                    class="min-w-full md:min-w-[300px] lg:min-w-[350px]"
                 />
             </IconField>
             <div class="flex gap-4">
@@ -40,7 +40,7 @@
                     optionValue="id"
                     :options="categories"
                     :loading="loadingCategories"
-                    class="w-52 items-center"
+                    class="w-full lg:w-52 items-center"
                     show-clear
                     @update:model-value="searchProducts"
                     empty-message="No hay categorías"
@@ -62,7 +62,7 @@
                             value: 0
                         }
                     ]"
-                    class="w-40 items-center"
+                    class="w-full lg:w-40 items-center"
                     placeholder="Estado"
                 />
             </div>

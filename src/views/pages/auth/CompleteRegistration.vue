@@ -100,6 +100,9 @@ const onFormSubmit = async (e) => {
         const user = await pb.collection('users').update(pb.authStore?.record?.id, {
             cafeteria_id: coffeeStore.id,
             phone,
+            activo: true,
+            last_login: new Date(),
+            emailVisibility: true,
             register_completed: true,
             role_id: roleAdmin.id
         });

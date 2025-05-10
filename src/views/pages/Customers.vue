@@ -19,7 +19,7 @@
                     placeholder="Buscar por nombre, identificación o email"
                     @input="searchCustomers"
                     v-model="searchInput"
-                    class="min-w-[350px]"
+                    class="min-w-[250px] sm:min-w-[350px]"
                 />
             </IconField>
             <Select

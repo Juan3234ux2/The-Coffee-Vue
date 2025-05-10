@@ -92,7 +92,7 @@ const getUsers = async (event) => {
         const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
         const result = await pb.collection('users').getList(currentPage, rowsPerPage.value, {
             sort: '-created',
-            filter: `(name~'${search ?? ''}' || email~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null`,
+            filter: `(name~'${search ?? ''}' || email~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null && cafeteria_id='${pb.authStore.record.cafeteria_id}'`,
             expand: 'role_id',
             fields: 'id, name, email, phone,activo, last_login, expand.role_id.id, expand.role_id.nombre,cash_register_id,'
         });

@@ -5,22 +5,39 @@
     width: 20rem;
     height: 100vh;
     z-index: 999;
-    overflow-y: auto;
     user-select: none;
+    overflow-y: auto;
     top: 4rem;
     transition:
-        transform var(--layout-section-transition-duration),
+        all var(--layout-section-transition-duration),
         left var(--layout-section-transition-duration);
     background-color: var(--surface-overlay);
-
-    padding: 1rem 2rem;
+    padding: 1rem 2rem 5rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent; 
+    &::-webkit-scrollbar {
+        width: 8px;
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: transparent;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+    &:hover {
+        scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
+        &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.5);
+        }
+    }
 }
 
 .layout-menu {
     margin: 0;
     padding: 0;
     list-style-type: none;
-
+    
     .layout-root-menuitem {
         > .layout-menuitem-root-text {
             font-size: 0.9rem;

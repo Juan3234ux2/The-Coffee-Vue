@@ -1,11 +1,11 @@
 <template>
     <div class="card">
         <div class="flex justify-between items-center mb-10">
-            <h1 class="text-4xl text-black font-bold !mb-0">Cajas</h1>
+            <h1 class="text-4xl text-black font-bold !mb-0">Turnos</h1>
             <Button
                 severity="primary"
                 class="!h-[3.2rem]"
-                label="Agregar Caja"
+                label="Agregar Turno"
                 icon="pi pi-plus"
                 @click="showModal = true"
             />
@@ -17,13 +17,13 @@
                 </InputIcon>
                 <InputText
                     placeholder="Buscar por nombre"
-                    @input="searchCashRegister"
+                    @input="searchShift"
                     v-model="searchInput"
                     class="min-w-[350px]"
                 />
             </IconField>
         </div>
-        <DataTable :value="cashRegisters" :loading>
+        <DataTable :value="shifts" :loading>
             <template #empty> Sin registros. </template>
             <Column field="nombre" header="Nombre"> </Column>
             <Column class="w-32">
@@ -35,8 +35,8 @@
                             severity="secondary"
                             variant="outlined"
                             rounded
-                            @click="editCashRegister(data)"
-                            v-tooltip.top="'Editar Caja'"
+                            @click="editShift(data)"
+                            v-tooltip.top="'Editar Turno'"
                             size="large"
                         />
                         <Button
@@ -45,64 +45,58 @@
                             variant="outlined"
                             rounded
                             @click="deleteCategory(data)"
-                            v-tooltip.top="'Eliminar Caja'"
+                            v-tooltip.top="'Eliminar Turno'"
                             size="large"
                         />
                     </div>
                 </template>
             </Column>
         </DataTable>
-        <ModalForm
-            collection="caja"
+        <ShiftForm
             :visible="showModal"
-            :data="cashData"
-            @closeModal="closeModal"
-            @newChanges="
+            @closeModal="
                 showModal = false;
-                fetchData();
-                searchInput = '';
+                shiftData = {};
             "
+            :shiftData
+            @newChanges="fetchData()"
         />
     </div>
 </template>
 
 <script setup>
-import ModalForm from '@/components/composables/ModalForm.vue';
+import ShiftForm from '@/components/shifts/ShiftForm.vue';
 import pb from '@/service/pocketbase';
 import debounce from '@/utils/debounce';
 import { useToast } from 'primevue';
 import { onMounted, ref } from 'vue';
 const searchInput = ref('');
 const showModal = ref(false);
-const cashData = ref({});
-const cashRegisters = ref([]);
+const shiftData = ref({});
+const shifts = ref([]);
 const toast = useToast();
 const loading = ref(false);
-const editCashRegister = (data) => {
+const editShift = (data) => {
     showModal.value = true;
-    cashData.value = data;
+    shiftData.value = data;
 };
-const closeModal = () => {
-    showModal.value = false;
-    cashData.value = [];
-};
-const searchCashRegister = debounce(() => {
+const searchShift = debounce(() => {
     fetchData();
 }, 300);
 const fetchData = async () => {
     try {
         loading.value = true;
-        const result = await pb.collection('cajas').getFullList({
+        const result = await pb.collection('turnos').getFullList({
             sort: '-created',
-            filter: `deleted=null && nombre~'${searchInput.value}' && cafeteria_id='${pb.authStore.record.cafeteria_id}'`
+            filter: `nombre~'${searchInput.value}'`
         });
-        cashRegisters.value = result;
+        shifts.value = result;
     } catch (error) {
         console.log(error);
         toast.add({
             severity: 'error',
             summary: 'Operación fallida',
-            detail: 'No se pudieron cargar las cajas',
+            detail: 'No se pudieron cargar los turnos',
             life: 3000
         });
     } finally {

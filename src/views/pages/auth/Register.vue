@@ -50,7 +50,6 @@ const onFormSubmit = async (e) => {
         const authData = await pb.collection('users').authWithPassword(email, password, {
             expand: 'role_id'
         });
-
         store.setUserLogged(authData.record);
 
         router.push({ name: 'dashboard' });
@@ -79,7 +78,8 @@ const createUser = async (roleId, coffeeStoreId, name, email, password, phone) =
         passwordConfirm: password,
         role_id: roleId,
         cafeteria_id: coffeeStoreId,
-        register_completed: true
+        emailVisibility: true,
+        last_login: new Date()
     });
 };
 </script>
