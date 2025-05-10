@@ -66,7 +66,7 @@ const getCategories = async (event) => {
         const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
         const result = await pb.collection('categorias').getList(currentPage, rowsPerPage.value, {
             sort: '-created',
-            filter: `(nombre~'${search ?? ''}') && deleted=null `,
+            filter: `(nombre~'${search ?? ''}') && deleted=null && cafeteria_id='${pb.authStore.record.cafeteria_id}'`,
             fields: 'id,nombre'
         });
         totalRecords.value = result.totalItems;

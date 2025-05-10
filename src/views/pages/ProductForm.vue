@@ -339,7 +339,7 @@ onMounted(async () => {
     try {
         loadingCategories.value = true;
         const result = await pb.collection('categorias').getFullList({
-            filter: 'deleted=null'
+            filter: 'deleted=null && cafeteria_id="' + store.getUserLogged?.cafeteria_id + '"'
         });
         categories.value = result;
     } catch (error) {

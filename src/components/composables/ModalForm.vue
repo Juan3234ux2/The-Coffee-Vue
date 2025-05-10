@@ -56,6 +56,7 @@
 
 <script setup>
 import pb from '@/service/pocketbase.js';
+import { useIndexStore } from '@/storage';
 import { Form } from '@primevue/forms';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useToast } from 'primevue/usetoast';
@@ -64,6 +65,7 @@ import { z } from 'zod';
 const toast = useToast();
 const emit = defineEmits(['closeModal', 'newChanges']);
 const loading = ref(false);
+const store = useIndexStore();
 const props = defineProps({
     visible: Boolean,
     collection: String,
@@ -104,7 +106,7 @@ const closeModal = () => {
 const onFormSubmit = async (e) => {
     if (!e.valid) return;
     try {
-        const payload = e.values;
+        const payload = { ...e.values, cafeteria_id: store?.getUserLogged?.cafeteria_id };
         loading.value = true;
         const item = isEditMode.value
             ? await pb.collection(`${props.collection}s`).update(payload.id, payload)

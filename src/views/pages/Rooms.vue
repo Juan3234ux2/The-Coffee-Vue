@@ -20,12 +20,15 @@ const getCoords = (index) => ({ x: index % 15, y: Math.floor(index / 15) });
 const getRooms = async () => {
     try {
         loading.value = true;
-        const result = await pb
-            .collection('salas')
-            .getFullList({ filter: 'deleted=null', fields: 'id,nombre' });
-        options.value = result.map((item) => ({ label: item.nombre, value: item.id }));
-        value.value = value.value ?? options.value[0].value;
-        await getTables();
+        const result = await pb.collection('salas').getFullList({
+            filter: 'deleted=null && cafeteria_id="' + pb.authStore.record.cafeteria_id + '"',
+            fields: 'id,nombre'
+        });
+        if (result.length > 0) {
+            options.value = result.map((item) => ({ label: item.nombre, value: item.id }));
+            value.value = value.value ?? options.value[0].value;
+            await getTables();
+        }
     } catch (error) {
         console.log(error);
         toast.add({
@@ -222,7 +225,7 @@ onMounted(getRooms);
                 class="mt-2 mb-4"
             />
             <div class="overflow-auto pt-6 max-h-[60vh] pl-2">
-                <div class="grid-celda border">
+                <div class="grid-celda border" v-if="value">
                     <TableCell
                         v-for="(_, index) in 100"
                         :key="index"
