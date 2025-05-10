@@ -7,11 +7,7 @@
                 class="!h-[3.2rem]"
                 label="Agregar Categoría"
                 icon="pi pi-plus"
-                @click="
-                    () => {
-                        showModal = true;
-                    }
-                "
+                @click="showModal = true"
             />
         </div>
         <div class="flex justify-between gap-4 mt-5 mb-3">
@@ -27,14 +23,21 @@
                 />
             </IconField>
         </div>
-        <CategoryList ref="categoryList" @editCategory="editCategory" />
-        <CategoryForm
+        <CategoryList
+            ref="categoryList"
+            @editCategory="
+                showModal = true;
+                categoryData = $event;
+            "
+        />
+        <ModalForm
+            collection="categoria"
             :visible="showModal"
-            :categoryData
-            @editCategory="editCategory"
+            :data="categoryData"
             @closeModal="closeModal"
             @newChanges="
                 () => {
+                    showModal = false;
                     categoryList.getCategories({ first: 0, rows: null });
                     searchInput = '';
                 }
@@ -44,8 +47,8 @@
 </template>
 
 <script setup>
-import CategoryForm from '@/components/categories/CategoryForm.vue';
 import CategoryList from '@/components/categories/CategoryList.vue';
+import ModalForm from '@/components/composables/ModalForm.vue';
 import debounce from '@/utils/debounce';
 import { ref } from 'vue';
 const categoryList = ref(null);
@@ -53,10 +56,6 @@ const searchInput = ref('');
 const showModal = ref(false);
 const categoryData = ref({});
 
-const editCategory = (category) => {
-    showModal.value = true;
-    categoryData.value = category;
-};
 const closeModal = () => {
     showModal.value = false;
     categoryData.value = [];

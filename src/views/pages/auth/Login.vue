@@ -22,7 +22,7 @@ const resolver = zodResolver(
             .string()
             .email({ message: 'Correo electrónico inválido' })
             .nonempty({ message: 'El correo es requerido.' }),
-        password: z.string().nonempty({ message: 'La contraseña es requerida.' })
+        password: z.string().nonempty({ message: 'La contraseña es requerida' })
     })
 );
 const onFormSubmit = async (e) => {
@@ -50,9 +50,10 @@ const onFormSubmit = async (e) => {
         }
     }
 };
-const nextRoute = () => {
+const nextRoute = async () => {
     const authData = store.getUserLogged;
-    if (authData.register_completed) {
+    if (authData.cafeteria_id) {
+        await pb.collection('users').update(authData.id, { last_login: new Date() });
         router.push({ name: 'dashboard' });
     } else {
         router.push({ name: 'complete-registration' });

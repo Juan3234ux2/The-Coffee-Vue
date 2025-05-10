@@ -7,11 +7,7 @@
                 class="!h-[3.2rem]"
                 label="Agregar Cliente"
                 icon="pi pi-plus"
-                @click="
-                    () => {
-                        showModal = true;
-                    }
-                "
+                @click="showModal = true"
             />
         </div>
         <div class="flex justify-between gap-4 mt-5 mb-3">
@@ -46,12 +42,20 @@
                 placeholder="Estado"
             />
         </div>
-        <CustomersList ref="customerList" @editCustomer="editCustomer" />
+        <CustomersList
+            ref="customerList"
+            @editCustomer="
+                showModal = true;
+                customerData = $event;
+            "
+        />
         <CustomerForm
             :visible="showModal"
             :customerData
-            @editCustomer="editCustomer"
-            @closeModal="closeModal"
+            @closeModal="
+                showModal = false;
+                customerData = [];
+            "
             @newChanges="searchCustomers"
         />
     </div>
@@ -67,15 +71,6 @@ const searchInput = ref('');
 const showModal = ref(false);
 const selectedStatus = ref(null);
 const customerData = ref({});
-
-const editCustomer = (customer) => {
-    showModal.value = true;
-    customerData.value = customer;
-};
-const closeModal = () => {
-    showModal.value = false;
-    customerData.value = [];
-};
 const searchCustomers = debounce(() => {
     customerList.value.getCustomers({
         first: 0,

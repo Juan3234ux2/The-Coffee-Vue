@@ -66,7 +66,7 @@
 import pb from '@/service/pocketbase.js';
 import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
-import { defineExpose, onMounted, ref } from 'vue';
+import { defineEmits, defineExpose, onMounted, ref } from 'vue';
 const customers = ref([]);
 const confirm = useConfirm();
 const first = ref(0);
@@ -74,6 +74,7 @@ const loading = ref(false);
 const totalRecords = ref(0);
 const rowsPerPage = ref(10);
 const toast = useToast();
+const emit = defineEmits(['editCustomer']);
 onMounted(() => getCustomers({ first: first.value, rows: rowsPerPage.value }));
 
 const getCustomers = async (event) => {
@@ -85,7 +86,7 @@ const getCustomers = async (event) => {
         const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
         const result = await pb.collection('clientes').getList(currentPage, rowsPerPage.value, {
             sort: '-created',
-            filter: `(nombre~'${search ?? ''}' || identificacion~'${search ?? ''}' || email~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null`
+            filter: `(nombre~'${search ?? ''}' || identificacion~'${search ?? ''}' || email~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null && cafeteria_id='${pb.authStore.record.cafeteria_id}'`
         });
         totalRecords.value = result.totalItems;
         customers.value = result.items;

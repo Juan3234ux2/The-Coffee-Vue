@@ -13,7 +13,11 @@
         currentPageReportTemplate="Mostrando {last} de {totalRecords} productos"
     >
         <template #empty> Sin registros. </template>
-        <Column field="codigo" header="Cód."> </Column>
+        <Column header="Cód.">
+            <template #body="{ data }">
+                {{ data.codigo !== 0 ? data.codigo : '' }}
+            </template>
+        </Column>
         <Column field="nombre" header="Producto"> </Column>
         <Column header="Categoría">
             <template #body="{ data }">
@@ -22,17 +26,21 @@
         </Column>
         <Column header="Costo">
             <template #body="{ data }">
-                {{ formatCurrency(data.costo) }}
+                {{ data?.costo ? formatCurrency(data.costo) : '-' }}
             </template>
         </Column>
         <Column header="Margen $">
             <template #body="{ data }">
-                {{ formatCurrency(data.precio - data.costo) }}
+                {{ data?.costo ? formatCurrency(data.precio - data.costo) : '-' }}
             </template>
         </Column>
         <Column header="Margen %">
             <template #body="{ data }">
-                {{ (((data.precio - data.costo) * 100) / data.precio).toFixed(2) }}%
+                {{
+                    data?.costo
+                        ? (((data.precio - data.costo) * 100) / data.precio).toFixed(2) + '%'
+                        : '-'
+                }}
             </template>
         </Column>
         <Column header="Precio">
@@ -79,6 +87,7 @@
 </template>
 <script setup>
 import pb from '@/service/pocketbase.js';
+import { useIndexStore } from '@/storage';
 import formatCurrency from '@/utils/formatCurrency';
 import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
@@ -90,6 +99,7 @@ const loading = ref(false);
 const totalRecords = ref(0);
 const rowsPerPage = ref(10);
 const toast = useToast();
+const store = useIndexStore();
 onMounted(() => getProducts({ first: first.value, rows: rowsPerPage.value }));
 
 const getProducts = async (event) => {
@@ -104,7 +114,7 @@ const getProducts = async (event) => {
         const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
         const result = await pb.collection('productos').getList(currentPage, rowsPerPage.value, {
             sort: '-created',
-            filter: `(nombre~'${search ?? ''}' || codigo~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null ${categoryFilter}`,
+            filter: `(nombre~'${search ?? ''}' || codigo~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null ${categoryFilter} && cafeteria_id='${pb.authStore.record.cafeteria_id}'`,
             fields: 'id,codigo, nombre, precio, costo, expand.categoria_id, activo, categoria_id',
             expand: 'categoria_id'
         });

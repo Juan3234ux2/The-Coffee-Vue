@@ -13,20 +13,23 @@
             </h1>
             <div class="mb-2" v-auto-animate>
                 <label for="codigo" class="block text-base font-semibold mb-2">Código</label>
-                <InputNumber
-                    input-id="codigo"
-                    :use-grouping="false"
+                <InputText
+                    id="codigo"
+                    type="number"
+                    min="0"
                     placeholder="Ingrese el codigo del producto"
                     fluid
+                    autocomplete="off"
                     class="mb-2"
                     name="codigo"
+                    @update:model-value="errorCodigo = ''"
                 />
                 <Message
-                    v-if="$form.codigo?.invalid"
+                    v-if="$form.codigo?.invalid || errorCodigo"
                     severity="error"
                     size="small"
                     variant="simple"
-                    >{{ $form.codigo.error?.message }}</Message
+                    >{{ errorCodigo || $form.codigo.error?.message }}</Message
                 >
             </div>
             <div class="mb-2" v-auto-animate>
@@ -38,6 +41,7 @@
                     fluid
                     class="mb-2"
                     name="nombre"
+                    autocomplete="off"
                 />
                 <Message
                     v-if="$form.nombre?.invalid"
@@ -52,14 +56,26 @@
                 <Select
                     optionLabel="nombre"
                     optionValue="id"
+                    label-id="categoria"
                     :options="categories"
                     :loading="loadingCategories"
+                    :emptyMessage="'No se encontraron categorias'"
                     class="mb-4"
                     fluid
                     :class="{ '!mb-2': $form.categoria_id?.invalid }"
                     name="categoria_id"
                     placeholder="Seleccione una categoría"
-                />
+                >
+                    <template #footer>
+                        <div>
+                            <Button
+                                label="Agregar categoría"
+                                variant="text"
+                                class="!h-[3.2rem] w-full"
+                                @click="showCategoryModal = true"
+                            /></div
+                    ></template>
+                </Select>
                 <Message
                     v-if="$form.categoria_id?.invalid"
                     severity="error"
@@ -79,6 +95,7 @@
                     fluid
                     class="mb-2 resize-none"
                     name="descripcion"
+                    autocomplete="off"
                 />
             </div>
             <div class="mb-2" v-auto-animate>
@@ -116,7 +133,7 @@
                 >
             </div>
 
-            <div class="mb-2" v-auto-animate>
+            <div class="mb-2" v-auto-animate :class="{ hidden: !isEditMode }">
                 <label for="status" class="block text-base font-semibold mb-2">Activo</label>
                 <ToggleSwitch input-id="status" class="mb-2" name="activo" />
             </div>
@@ -124,9 +141,7 @@
 
         <div class="card h-fit xl:sticky w-[310px] top-24">
             <div class="flex flex-col flex-1 max-w-md mb-8">
-                <span for="codigo" class="block text-base font-semibold mb-2"
-                    >Imagen del producto</span
-                >
+                <label class="block text-base font-semibold mb-2">Imagen del producto</label>
                 <div class="w-full bg-surface-50 dark:bg-surface-950 aspect-square">
                     <div class="flex items-center justify-center h-full bg-surface-400" v-if="!src">
                         <i class="pi pi-images text-white" style="font-size: 4.5rem"></i>
@@ -138,6 +153,7 @@
                     @select="onFileSelect"
                     customUpload
                     auto
+                    accept="image/*"
                     chooseLabel="Cargar"
                     class="!h-[3.2rem]"
                     chooseIcon="pi pi-cloud-upload"
@@ -175,11 +191,18 @@
             </div>
         </div>
     </Form>
+    <ModalForm
+        collection="categoria"
+        :visible="showCategoryModal"
+        @closeModal="showCategoryModal = false"
+        @newChanges="handleCategorySave"
+    />
 </template>
 <script setup>
+import ModalForm from '@/components/composables/ModalForm.vue';
 import pb from '@/service/pocketbase';
+import { useIndexStore } from '@/storage';
 import getFileUrl from '@/utils/getFileUrl';
-import { Form } from '@primevue/forms';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -194,17 +217,20 @@ const src = ref(null);
 const imagen = ref(null);
 const loading = ref(false);
 const form = ref(null);
+const errorCodigo = ref('');
+const showCategoryModal = ref(false);
+const store = useIndexStore();
 const loadingCategories = ref(false);
 const isEditMode = computed(() => (route.params?.id ? true : false));
 const initialValues = computed(() => {
     return {
         nombre: productData.value?.nombre ?? '',
-        codigo: productData.value?.codigo ?? null,
-        categoria_id: productData.value?.categoria_id ?? null,
+        codigo: productData.value?.codigo !== 0 ? productData.value?.codigo : null,
+        categoria_id: productData.value?.categoria_id ?? '',
         descripcion: productData.value?.descripcion ?? '',
-        costo: productData.value?.costo ?? null,
+        costo: productData.value?.costo !== 0 ? productData.value?.costo : null,
         precio: productData.value?.precio ?? null,
-        activo: productData.value?.activo ?? true
+        activo: isEditMode.value ? productData.value?.activo : true
     };
 });
 const resolver = zodResolver(
@@ -213,13 +239,10 @@ const resolver = zodResolver(
             .string()
             .nonempty('El nombre es requerido')
             .min(4, { message: 'Mínimo 4 caracteres.' }),
-        categoria_id: z.string({
-            required_error: 'La categoria es requerida',
-            invalid_type_error: 'La categoria es requerida'
-        }),
+        categoria_id: z.string().nonempty({ message: 'La categoria es requerida' }),
         descripcion: z.string().optional(),
-        codigo: z.coerce.number().min(1, { message: 'El codigo es requerido' }),
-        costo: z.coerce.number().min(1, { message: 'El costo es requerido' }),
+        codigo: z.coerce.number().optional(),
+        costo: z.coerce.number().optional(),
         precio: z.coerce.number().min(1, { message: 'El precio es requerido' }),
         activo: z.boolean()
     })
@@ -235,9 +258,17 @@ function onFileSelect(event) {
 }
 const onFormSubmit = async (event) => {
     if (!event.valid) return;
+    if (!(await validateUniqueCodigo(event.values.codigo))) {
+        errorCodigo.value = 'Ya existe un producto con ese código';
+        return;
+    }
     try {
         loading.value = true;
-        const payload = { ...event.values, imagen: imagen.value };
+        const payload = {
+            ...event.values,
+            imagen: imagen.value,
+            cafeteria_id: store?.getUserLogged?.cafeteria_id
+        };
         if (src.value && !imagen.value) {
             delete payload.imagen;
         }
@@ -263,7 +294,11 @@ const onFormSubmit = async (event) => {
         loading.value = false;
     }
 };
-
+const handleCategorySave = (_, category) => {
+    categories.value.push(category);
+    form.value.setFieldValue('categoria_id', category.id);
+    showCategoryModal.value = false;
+};
 const fetchData = async () => {
     if (!isEditMode.value) {
         productData.value = null;
@@ -293,6 +328,13 @@ const fetchData = async () => {
     }
 };
 watch(() => route.params?.id, fetchData, { immediate: true });
+const validateUniqueCodigo = async (codigo) => {
+    if (codigo == productData.value?.codigo || codigo == 0) return true;
+    const result = await pb.collection('productos').getList(1, 1, {
+        filter: `codigo='${codigo}' && cafeteria_id='${store.getUserLogged?.cafeteria_id} && deleted=null'`
+    });
+    return result.totalItems === 0;
+};
 onMounted(async () => {
     try {
         loadingCategories.value = true;

@@ -41,6 +41,7 @@
                     :options="categories"
                     :loading="loadingCategories"
                     class="w-52 items-center"
+                    show-clear
                     @update:model-value="searchProducts"
                     empty-message="No hay categorías"
                     placeholder="Categoría"

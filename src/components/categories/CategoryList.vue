@@ -46,7 +46,7 @@
 import pb from '@/service/pocketbase.js';
 import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
-import { defineExpose, onMounted, ref } from 'vue';
+import { defineEmits, defineExpose, onMounted, ref } from 'vue';
 const categories = ref([]);
 const confirm = useConfirm();
 const first = ref(0);
@@ -54,6 +54,7 @@ const loading = ref(false);
 const totalRecords = ref(0);
 const rowsPerPage = ref(10);
 const toast = useToast();
+const emit = defineEmits(['editCategory']);
 onMounted(() => getCategories({ first: first.value, rows: rowsPerPage.value }));
 
 const getCategories = async (event) => {

@@ -49,6 +49,16 @@ const router = createRouter({
                     path: 'rooms',
                     name: 'rooms',
                     component: () => import('@/views/pages/Rooms.vue')
+                },
+                {
+                    path: 'users',
+                    name: 'users',
+                    component: () => import('@/views/pages/Users.vue')
+                },
+                {
+                    path: 'cash-registers',
+                    name: 'cash-registers',
+                    component: () => import('@/views/pages/CashRegisters.vue')
                 }
             ]
         },
@@ -92,7 +102,7 @@ const router = createRouter({
 });
 router.beforeEach(async (to, from, next) => {
     const loggedIn = pb.authStore.isValid;
-    const isComplete = pb.authStore?.record?.register_completed;
+    const isComplete = !!pb.authStore?.record?.cafeteria_id;
     if (loggedIn && to.name === 'login' && isComplete) {
         return next({ name: 'dashboard' });
     }

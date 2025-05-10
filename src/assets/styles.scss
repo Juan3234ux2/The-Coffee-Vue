@@ -12,3 +12,13 @@ input,
     height: 3.2rem !important;
     align-items: center !important;
 }
+.required::after {
+    content: '*';
+    color:red;
+    margin-left: 2px;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

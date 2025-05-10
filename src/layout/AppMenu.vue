@@ -18,7 +18,7 @@ const model = ref([
                 label: 'Configuraciones',
                 icon: 'bx bx-cog',
                 items: [
-                    { label: 'Cajas', to: '/admin/cash-register' },
+                    { label: 'Cajas', to: '/admin/cash-registers' },
                     { label: 'Roles', to: '/admin/roles' },
                     { label: 'Salas y Mesas', to: '/admin/rooms' },
                     { label: 'Usuarios', to: '/admin/users' }
