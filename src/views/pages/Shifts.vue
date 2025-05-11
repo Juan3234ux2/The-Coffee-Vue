@@ -88,7 +88,7 @@ const fetchData = async () => {
         loading.value = true;
         const result = await pb.collection('turnos').getFullList({
             sort: '-created',
-            filter: `nombre~'${searchInput.value}'`
+            filter: `nombre~'${searchInput.value}' && cafeteria_id='${pb.authStore.record.cafeteria_id}'`
         });
         shifts.value = result;
     } catch (error) {
