@@ -331,8 +331,9 @@ watch(() => route.params?.id, fetchData, { immediate: true });
 const validateUniqueCodigo = async (codigo) => {
     if (codigo == productData.value?.codigo || codigo == 0) return true;
     const result = await pb.collection('productos').getList(1, 1, {
-        filter: `codigo='${codigo}' && cafeteria_id='${store.getUserLogged?.cafeteria_id} && deleted=null'`
+        filter: `cafeteria_id='${store.getUserLogged?.cafeteria_id}' && deleted=null && codigo='${codigo}'`
     });
+    console.log(store.getUserLogged?.cafeteria_id);
     return result.totalItems === 0;
 };
 onMounted(async () => {

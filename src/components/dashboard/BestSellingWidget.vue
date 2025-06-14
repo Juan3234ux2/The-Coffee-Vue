@@ -39,7 +39,11 @@ const products = ref([
     <div class="card !mb-2">
         <div class="flex justify-between items-center mb-6">
             <p class="font-semibold text-xl text-black !mb-0">Productos Populares</p>
-            <SelectButton default-value="Semanal" :options="['Semanal', 'Mensual']" />
+            <SelectButton
+                default-value="Semanal"
+                :options="['Semanal', 'Mensual']"
+                :allow-empty="false"
+            />
         </div>
 
         <DataTable :value="products" size="large">

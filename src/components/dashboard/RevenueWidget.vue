@@ -72,7 +72,11 @@ onMounted(() => {
     <div class="card !mb-2">
         <div class="flex justify-between items-center mb-6">
             <p class="font-semibold text-xl text-black !mb-0">Flujo de ingresos</p>
-            <SelectButton default-value="Semanal" :options="['Semanal', 'Mensual']" />
+            <SelectButton
+                default-value="Semanal"
+                :options="['Semanal', 'Mensual']"
+                :allowEmpty="false"
+            />
         </div>
         <Chart type="line" :data="chartData" :options="chartOptions" class="h-80" />
     </div>
