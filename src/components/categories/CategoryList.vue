@@ -43,7 +43,7 @@
     <ConfirmDialog></ConfirmDialog>
 </template>
 <script setup>
-import pb from '@/service/pocketbase.js';
+import { api } from '@/service/api';
 import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
 import { defineEmits, defineExpose, onMounted, ref } from 'vue';
@@ -62,25 +62,19 @@ const getCategories = async (event) => {
         first.value = event.first;
         rowsPerPage.value = event.rows ?? rowsPerPage.value;
         loading.value = true;
-        const search = event.search;
-        const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
-        const result = await pb.collection('categorias').getList(currentPage, rowsPerPage.value, {
-            sort: '-created',
-            filter: `(nombre~'${search ?? ''}') && deleted=null && cafeteria_id='${pb.authStore.record.cafeteria_id}'`,
-            fields: 'id,nombre'
+        const result = await api.get('/categories', {
+            params: { rows: rowsPerPage.value, first: first.value, search: event.search }
         });
-        totalRecords.value = result.totalItems;
-        categories.value = result.items;
+        totalRecords.value = result.data.totalRecords;
+        categories.value = result.data.data;
     } catch (error) {
         console.log(error);
-        if (!error.message.includes('The request was autocancelled')) {
-            toast.add({
-                severity: 'error',
-                summary: 'Operación fallida',
-                detail: 'No se pudo obtener las categorías',
-                life: 3000
-            });
-        }
+        toast.add({
+            severity: 'error',
+            summary: 'Operación fallida',
+            detail: 'No se pudo obtener las categorías',
+            life: 3000
+        });
     } finally {
         loading.value = false;
     }
@@ -100,7 +94,7 @@ const deleteCategory = (data) => {
             severity: 'danger'
         },
         accept: async () => {
-            await pb.collection('categorias').update(data.id, { deleted: new Date() });
+            await api.patch(`/categories/${data.id}`, { deleted_at: new Date() });
             getCategories({ first: first.value, rows: rowsPerPage.value });
             toast.add({
                 severity: 'success',

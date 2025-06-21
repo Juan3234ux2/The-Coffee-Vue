@@ -55,18 +55,15 @@
 </template>
 
 <script setup>
-import pb from '@/service/pocketbase.js';
-import { useIndexStore } from '@/storage';
+import { api } from '@/service/api';
 import { Form } from '@primevue/forms';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useToast } from 'primevue/usetoast';
 import { computed, defineEmits, defineProps, ref } from 'vue';
 import { z } from 'zod';
-import { api } from '@/service/api';
 const toast = useToast();
 const emit = defineEmits(['closeModal', 'newChanges']);
 const loading = ref(false);
-const store = useIndexStore();
 const props = defineProps({
     visible: Boolean,
     collection: String,
@@ -82,7 +79,7 @@ const visible = computed({
 });
 const resolver = zodResolver(
     z.object({
-        id: z.string().optional(),
+        id: z.coerce.number().optional(),
         nombre: z
             .string()
             .nonempty({ message: 'El nombre es requerido' })
@@ -106,9 +103,10 @@ const closeModal = () => {
     emit('closeModal');
 };
 const onFormSubmit = async (e) => {
+    console.log(e);
     if (!e.valid) return;
     try {
-        const payload = { ...e.values, cafeteria_id: store?.getUserLogged?.cafeteria_id };
+        const payload = e.values;
         loading.value = true;
         const item = isEditMode.value
             ? await api.patch(`${props.endpoint}/${payload.id}`, payload)
@@ -119,7 +117,7 @@ const onFormSubmit = async (e) => {
             detail: `La ${props.collection} se ha ${isEditMode.value ? 'editado' : 'creado'} correctamente`,
             life: 3000
         });
-        emit('newChanges', isEditMode.value, item);
+        emit('newChanges', isEditMode.value, item.data);
     } catch (error) {
         console.log(error);
         toast.add({

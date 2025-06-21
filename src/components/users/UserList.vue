@@ -71,6 +71,7 @@ import { useIndexStore } from '@/storage';
 import dayjs from 'dayjs/esm';
 import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
+import { api } from '@/service/api';
 import { defineEmits, defineExpose, onMounted, ref } from 'vue';
 const users = ref([]);
 const confirm = useConfirm();
@@ -90,14 +91,9 @@ const getUsers = async (event) => {
         loading.value = true;
         const search = event.search;
         const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
-        const result = await pb.collection('users').getList(currentPage, rowsPerPage.value, {
-            sort: '-created',
-            filter: `(name~'${search ?? ''}' || email~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null && cafeteria_id='${pb.authStore.record.cafeteria_id}'`,
-            expand: 'role_id',
-            fields: 'id, name, email, phone,activo, last_login, expand.role_id.id, expand.role_id.nombre,cash_register_id,'
-        });
-        totalRecords.value = result.totalItems;
-        users.value = result.items;
+        const result = await api.get('users');
+        totalRecords.value = result.data.length;
+        users.value = result.data;
     } catch (error) {
         console.log(error);
         if (!error.message.includes('The request was autocancelled')) {

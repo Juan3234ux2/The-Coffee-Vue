@@ -1,5 +1,4 @@
 import AppLayout from '@/layout/AppLayout.vue';
-import pb from '@/service/pocketbase';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -8,6 +7,9 @@ const router = createRouter({
         {
             path: '/admin',
             component: AppLayout,
+            meta: {
+                requiresAuth: true
+            },
             children: [
                 {
                     path: 'dashboard',
@@ -148,22 +150,7 @@ const router = createRouter({
     ]
 });
 router.beforeEach(async (to, from, next) => {
-    const loggedIn = pb.authStore.isValid;
-    const isComplete = !!pb.authStore?.record?.cafeteria_id;
-    if (loggedIn && to.name === 'login' && isComplete) {
-        return next({ name: 'dashboard' });
-    }
-    if (
-        loggedIn &&
-        !isComplete &&
-        to.name !== 'complete-registration' &&
-        to.fullPath.includes('/admin')
-    ) {
-        return next({ name: 'complete-registration' });
-    }
-    if (to.fullPath.includes('/admin') && !loggedIn) {
-        return next({ name: 'login' });
-    }
+    const token = localStorage.getItem('token');
 
     next();
 });

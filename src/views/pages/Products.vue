@@ -73,7 +73,7 @@
 
 <script setup>
 import ProductList from '@/components/products/ProductList.vue';
-import pb from '@/service/pocketbase';
+import { api } from '@/service/api';
 import debounce from '@/utils/debounce';
 import { useToast } from 'primevue';
 import { onMounted, ref } from 'vue';
@@ -96,8 +96,8 @@ const searchProducts = debounce(() => {
 onMounted(async () => {
     try {
         loadingCategories.value = true;
-        const result = await pb.collection('categorias').getFullList({ sort: '-created' });
-        categories.value = result;
+        const result = await api.get('/categories');
+        categories.value = result.data;
     } catch (error) {
         toast.add({
             severity: 'error',

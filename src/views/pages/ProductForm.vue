@@ -200,14 +200,12 @@
 </template>
 <script setup>
 import ModalForm from '@/components/composables/ModalForm.vue';
-import pb from '@/service/pocketbase';
+import { api } from '@/service/api';
 import { useIndexStore } from '@/storage';
-import getFileUrl from '@/utils/getFileUrl';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { api } from '@/service/api';
 import z from 'zod';
 const toast = useToast();
 const router = useRouter();
@@ -270,7 +268,6 @@ const onFormSubmit = async (event) => {
         if (src.value && !imagen.value) {
             delete payload.imagen;
         }
-        payload.categoria_id = 1;
         isEditMode.value
             ? await api.patch(`/products/${route.params.id}`, payload)
             : await api.post('/products', payload);
@@ -329,7 +326,7 @@ onMounted(async () => {
     try {
         loadingCategories.value = true;
         const result = await api.get('/categories');
-        categories.value = result.data;
+        categories.value = result.data.data;
     } catch (error) {
         console.log(error);
         toast.add({

@@ -1,4 +1,5 @@
 <script setup>
+import { api } from '@/service/api';
 import pb from '@/service/pocketbase';
 import { useIndexStore } from '@/storage';
 import { Form } from '@primevue/forms';
@@ -29,34 +30,21 @@ const onFormSubmit = async (e) => {
     if (e.valid) {
         try {
             loading.value = true;
-            const authData = await pb
-                .collection('users')
-                .authWithPassword(e.values.email, e.values.password, {
-                    expand: 'role_id'
-                });
-
-            store.setUserLogged(authData.record);
-            nextRoute();
+            const result = await api.post('/auth/login', e.values);
+            store.setUserLogged(result.data.user);
+            localStorage.setItem('token', result.data.token);
+            router.push({ name: 'dashboard' });
         } catch (error) {
             toast.add({
                 severity: 'error',
                 summary: 'Operación fallida',
-                detail: 'Intentelo nuevamente',
+                detail: error.response.data.message,
                 life: 3000
             });
             console.error(error);
         } finally {
             loading.value = false;
         }
-    }
-};
-const nextRoute = async () => {
-    const authData = store.getUserLogged;
-    if (authData.cafeteria_id) {
-        await pb.collection('users').update(authData.id, { last_login: new Date() });
-        router.push({ name: 'dashboard' });
-    } else {
-        router.push({ name: 'complete-registration' });
     }
 };
 const googleLogin = async () => {

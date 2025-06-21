@@ -87,12 +87,11 @@
     <ConfirmDialog></ConfirmDialog>
 </template>
 <script setup>
-import pb from '@/service/pocketbase.js';
+import { api } from '@/service/api.js';
 import formatCurrency from '@/utils/formatCurrency';
 import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
 import { defineExpose, onMounted, ref } from 'vue';
-import { api } from '@/service/api.js';
 const products = ref([]);
 const confirm = useConfirm();
 const first = ref(0);
@@ -108,31 +107,28 @@ const getProducts = async (event) => {
         first.value = event.first;
         rowsPerPage.value = event.rows ?? rowsPerPage.value;
         const search = event.search;
-        const result = await api.get('/products');
-        totalRecords.value = result.data.length;
-        products.value = result.data;
-        /*
-        const categoryFilter = event?.categories?.length
-            ? ` && (${event.categories.map((id) => `categoria_id='${id}'`).join(' || ')})`
-            : '';
-        const currentPage = Math.floor(first.value / rowsPerPage.value) + 1;
-        const result = await pb.collection('productos').getList(currentPage, rowsPerPage.value, {
-            sort: '-created',
-            filter: `(nombre~'${search ?? ''}' || codigo~'${search ?? ''}') && activo~'${event.status ?? ''}' && deleted=null ${categoryFilter} && cafeteria_id='${pb.authStore.record.cafeteria_id}'`,
-            fields: 'id,codigo, nombre, precio, costo, expand.categoria_id, activo, categoria_id',
-            expand: 'categoria_id'
+        const categories = event.categories;
+        const status = event.status;
+        console.log(categories);
+        const result = await api.get('/products', {
+            params: {
+                rows: rowsPerPage.value,
+                first: first.value,
+                categories: categories,
+                search,
+                status
+            }
         });
-        */
+        totalRecords.value = result.data.totalRecords;
+        products.value = result.data.data;
     } catch (error) {
         console.log(error);
-        if (!error.message.includes('The request was autocancelled')) {
-            toast.add({
-                severity: 'error',
-                summary: 'Operación fallida',
-                detail: 'No se pudo obtener los productos',
-                life: 3000
-            });
-        }
+        toast.add({
+            severity: 'error',
+            summary: 'Operación fallida',
+            detail: 'No se pudo obtener los productos',
+            life: 3000
+        });
     } finally {
         loading.value = false;
     }
@@ -152,8 +148,7 @@ const deleteProduct = (data) => {
             severity: 'danger'
         },
         accept: async () => {
-            await api.patch(`/products/${data.id}`, { params: { deleted: true } });
-            await pb.collection('productos').update(data.id, { deleted: new Date() });
+            await api.patch(`/products/${data.id}`, { deleted_at: new Date() });
             getProducts({ first: first.value, rows: rowsPerPage.value });
             toast.add({
                 severity: 'success',

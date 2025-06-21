@@ -1,8 +1,6 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-import pb from '@/service/pocketbase';
 import { useIndexStore } from '@/storage';
-import getFileUrl from '@/utils/getFileUrl';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 const { toggleMenu } = useLayout();
@@ -16,32 +14,10 @@ const toggle = (event) => {
 };
 const logout = () => {
     router.push({ name: 'login' });
-    pb.authStore.clear();
+    localStorage.removeItem('token');
     store.setUserLogged(null);
 };
-onMounted(async () => {
-    const router = useRouter();
-    try {
-        loading.value = true;
-        if (!store.userLogged && pb.authStore.isValid) {
-            const user = await pb.collection('users').getOne(pb.authStore.record.id);
-            store.setUserLogged(user);
-        }
-        if (store.userLogged?.avatar) {
-            avatar.value = getFileUrl(
-                store.userLogged.collectionId,
-                store.userLogged.id,
-                store.userLogged.avatar
-            );
-        }
-    } catch (error) {
-        pb.authStore.clear();
-        store.setUserLogged(null);
-        router.push({ name: 'login' });
-    } finally {
-        loading.value = false;
-    }
-});
+onMounted(async () => {});
 </script>
 
 <template>
