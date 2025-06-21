@@ -94,6 +94,48 @@ const router = createRouter({
             ]
         },
         {
+            path: '/pos',
+            component: AppLayout,
+            children: [
+                {
+                    path: '',
+                    name: 'pos',
+                    component: () => import('@/views/pages/TablesPos.vue')
+                },
+                {
+                    path: 'order-details/:id',
+                    name: 'order-details',
+                    component: () => import('@/views/pages/CashRegisters.vue')
+                }
+            ]
+        },
+        {
+            path: '/',
+            name: 'landing',
+            component: () => import('@/views/pages/Landing.vue')
+        },
+        {
+            path: '/auth',
+            component: () => import('@/layout/AuthLayout.vue'),
+            children: [
+                {
+                    path: 'register',
+                    name: 'register',
+                    component: () => import('@/views/pages/auth/Register.vue')
+                },
+                {
+                    path: 'login',
+                    name: 'login',
+                    component: () => import('@/views/pages/auth/Login.vue')
+                },
+                {
+                    path: 'complete-registration',
+                    name: 'complete-registration',
+                    component: () => import('@/views/pages/auth/CompleteRegistration.vue')
+                }
+            ]
+        },
+        {
             path: '/auth/access',
             name: 'accessDenied',
             component: () => import('@/views/pages/auth/Access.vue')

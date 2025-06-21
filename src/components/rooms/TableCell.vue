@@ -13,7 +13,7 @@
     >
         <div
             v-if="table"
-            class="bg-surface-500 group flex justify-center items-center text-xl font-semibold text-white relative transition-all duration-300 ease-in-out"
+            class="group flex justify-center items-center text-xl font-semibold text-white relative transition-all duration-300 ease-in-out"
             :style="{
                 borderRadius: table.forma === 'Redonda' ? '50%' : '6px'
             }"
@@ -21,7 +21,7 @@
             @dragstart="handleDragStart"
             @dragend="isDragging = false"
             :draggable="isAdminView"
-            :class="{ 'dragging-origin': isDragging } + getSize()"
+            :class="{ 'dragging-origin': isDragging } + getSize() + getColor()"
         >
             <div
                 class="transition-opacity duration-300 ease-in-out opacity-0 group-hover:opacity-100 flex justify-center items-center absolute bottom-[-10px] z-10"
@@ -71,11 +71,20 @@ const props = defineProps({
 });
 const getSize = () => {
     if (props.table.capacidad <= 2) {
-        return ' !h-[60%] !w-[60%]';
+        return ' !h-[60%] !w-[60%] ';
     } else if (props.table.capacidad <= 4) {
-        return ' !h-[75%] !w-[75%]';
+        return ' !h-[75%] !w-[75%] ';
     } else {
-        return ' !h-[95%] !w-[95%]';
+        return ' !h-[95%] !w-[95%] ';
+    }
+};
+const getColor = () => {
+    if (props.isAdminView) {
+        return 'bg-surface-500';
+    } else if (props.table.estado === 'ocupado') {
+        return 'bg-red-700';
+    } else {
+        return 'bg-green-700';
     }
 };
 const handleDragEnter = () => {

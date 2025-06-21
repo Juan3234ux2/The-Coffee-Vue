@@ -32,6 +32,7 @@
         />
         <ModalForm
             collection="categoria"
+            endpoint="categories"
             :visible="showModal"
             :data="categoryData"
             @closeModal="closeModal"

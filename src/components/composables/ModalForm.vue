@@ -62,6 +62,7 @@ import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useToast } from 'primevue/usetoast';
 import { computed, defineEmits, defineProps, ref } from 'vue';
 import { z } from 'zod';
+import { api } from '@/service/api';
 const toast = useToast();
 const emit = defineEmits(['closeModal', 'newChanges']);
 const loading = ref(false);
@@ -69,6 +70,7 @@ const store = useIndexStore();
 const props = defineProps({
     visible: Boolean,
     collection: String,
+    endpoint: String,
     data: {
         type: Object,
         default: {}
@@ -109,8 +111,8 @@ const onFormSubmit = async (e) => {
         const payload = { ...e.values, cafeteria_id: store?.getUserLogged?.cafeteria_id };
         loading.value = true;
         const item = isEditMode.value
-            ? await pb.collection(`${props.collection}s`).update(payload.id, payload)
-            : await pb.collection(`${props.collection}s`).create(payload);
+            ? await api.patch(`${props.endpoint}/${payload.id}`, payload)
+            : await api.post(`${props.endpoint}`, payload);
         toast.add({
             severity: 'success',
             summary: 'Operación exitosa',

@@ -16,7 +16,6 @@
                 <InputText
                     id="codigo"
                     type="number"
-                    min="0"
                     placeholder="Ingrese el codigo del producto"
                     fluid
                     autocomplete="off"
@@ -193,6 +192,7 @@
     </Form>
     <ModalForm
         collection="categoria"
+        endpoint="categories"
         :visible="showCategoryModal"
         @closeModal="showCategoryModal = false"
         @newChanges="handleCategorySave"
@@ -207,6 +207,7 @@ import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { api } from '@/service/api';
 import z from 'zod';
 const toast = useToast();
 const router = useRouter();
@@ -225,7 +226,7 @@ const isEditMode = computed(() => (route.params?.id ? true : false));
 const initialValues = computed(() => {
     return {
         nombre: productData.value?.nombre ?? '',
-        codigo: productData.value?.codigo !== 0 ? productData.value?.codigo : null,
+        codigo: productData.value?.codigo ?? null,
         categoria_id: productData.value?.categoria_id ?? '',
         descripcion: productData.value?.descripcion ?? '',
         costo: productData.value?.costo !== 0 ? productData.value?.costo : null,
@@ -239,7 +240,7 @@ const resolver = zodResolver(
             .string()
             .nonempty('El nombre es requerido')
             .min(4, { message: 'Mínimo 4 caracteres.' }),
-        categoria_id: z.string().nonempty({ message: 'La categoria es requerida' }),
+        categoria_id: z.coerce.number().min(1, { message: 'La categoria es requerida' }),
         descripcion: z.string().optional(),
         codigo: z.coerce.number().optional(),
         costo: z.coerce.number().optional(),
@@ -258,23 +259,21 @@ function onFileSelect(event) {
 }
 const onFormSubmit = async (event) => {
     if (!event.valid) return;
-    if (!(await validateUniqueCodigo(event.values.codigo))) {
-        errorCodigo.value = 'Ya existe un producto con ese código';
-        return;
-    }
     try {
         loading.value = true;
         const payload = {
             ...event.values,
+            codigo: event.values.codigo ? event.values.codigo : null,
             imagen: imagen.value,
             cafeteria_id: store?.getUserLogged?.cafeteria_id
         };
         if (src.value && !imagen.value) {
             delete payload.imagen;
         }
+        payload.categoria_id = 1;
         isEditMode.value
-            ? await pb.collection('productos').update(route?.params?.id, payload)
-            : await pb.collection('productos').create(payload);
+            ? await api.patch(`/products/${route.params.id}`, payload)
+            : await api.post('/products', payload);
         toast.add({
             severity: 'success',
             summary: 'Operación exitosa',
@@ -287,7 +286,7 @@ const onFormSubmit = async (event) => {
         toast.add({
             severity: 'error',
             summary: 'Operación fallida',
-            detail: 'No se pudo crear el producto',
+            detail: error.response.data.message,
             life: 3000
         });
     } finally {
@@ -307,14 +306,12 @@ const fetchData = async () => {
     }
     try {
         loading.value = true;
-        const result = await pb.collection('productos').getOne(route?.params?.id);
-        productData.value = result;
+        const result = await api.get(`/products/${route.params.id}`);
+        productData.value = result.data;
+        productData.value.categoria_id = productData.value.categoria.id;
         form.value.setValues({
             ...initialValues.value
         });
-        src.value = result.imagen
-            ? getFileUrl(result.collectionId, result.id, result.imagen)
-            : null;
     } catch (error) {
         console.log(error);
         toast.add({
@@ -328,21 +325,11 @@ const fetchData = async () => {
     }
 };
 watch(() => route.params?.id, fetchData, { immediate: true });
-const validateUniqueCodigo = async (codigo) => {
-    if (codigo == productData.value?.codigo || codigo == 0) return true;
-    const result = await pb.collection('productos').getList(1, 1, {
-        filter: `cafeteria_id='${store.getUserLogged?.cafeteria_id}' && deleted=null && codigo='${codigo}'`
-    });
-    console.log(store.getUserLogged?.cafeteria_id);
-    return result.totalItems === 0;
-};
 onMounted(async () => {
     try {
         loadingCategories.value = true;
-        const result = await pb.collection('categorias').getFullList({
-            filter: 'deleted=null && cafeteria_id="' + store.getUserLogged?.cafeteria_id + '"'
-        });
-        categories.value = result;
+        const result = await api.get('/categories');
+        categories.value = result.data;
     } catch (error) {
         console.log(error);
         toast.add({

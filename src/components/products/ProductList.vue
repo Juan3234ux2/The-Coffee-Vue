@@ -16,13 +16,13 @@
         <template #empty> Sin registros. </template>
         <Column header="Cód.">
             <template #body="{ data }">
-                {{ data.codigo !== 0 ? data.codigo : '' }}
+                {{ data.codigo ?? '-' }}
             </template>
         </Column>
         <Column field="nombre" header="Producto"> </Column>
         <Column header="Categoría">
             <template #body="{ data }">
-                {{ data.expand?.categoria_id?.nombre }}
+                {{ data.categoria.nombre }}
             </template>
         </Column>
         <Column header="Costo">
@@ -92,6 +92,7 @@ import formatCurrency from '@/utils/formatCurrency';
 import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
 import { defineExpose, onMounted, ref } from 'vue';
+import { api } from '@/service/api.js';
 const products = ref([]);
 const confirm = useConfirm();
 const first = ref(0);
@@ -103,10 +104,14 @@ onMounted(() => getProducts({ first: first.value, rows: rowsPerPage.value }));
 
 const getProducts = async (event) => {
     try {
+        loading.value = true;
         first.value = event.first;
         rowsPerPage.value = event.rows ?? rowsPerPage.value;
-        loading.value = true;
         const search = event.search;
+        const result = await api.get('/products');
+        totalRecords.value = result.data.length;
+        products.value = result.data;
+        /*
         const categoryFilter = event?.categories?.length
             ? ` && (${event.categories.map((id) => `categoria_id='${id}'`).join(' || ')})`
             : '';
@@ -117,8 +122,7 @@ const getProducts = async (event) => {
             fields: 'id,codigo, nombre, precio, costo, expand.categoria_id, activo, categoria_id',
             expand: 'categoria_id'
         });
-        totalRecords.value = result.totalItems;
-        products.value = result.items;
+        */
     } catch (error) {
         console.log(error);
         if (!error.message.includes('The request was autocancelled')) {
@@ -148,6 +152,7 @@ const deleteProduct = (data) => {
             severity: 'danger'
         },
         accept: async () => {
+            await api.patch(`/products/${data.id}`, { params: { deleted: true } });
             await pb.collection('productos').update(data.id, { deleted: new Date() });
             getProducts({ first: first.value, rows: rowsPerPage.value });
             toast.add({
